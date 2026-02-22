@@ -286,7 +286,7 @@ function StrategySection({ isMobile }: ResponsiveProps) {
           <div style={{ background:C.navy, borderRadius:12, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>🌐</div>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:10 }}>
-          {[{l:"EOM",d:"Enterprise Operations & Maintenance",c:C.eom},{l:"Projects",d:"Capital Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft}].map(x => (
+          {[{l:"EOM",d:"Emergency Operations & Maintenance",c:C.eom},{l:"Projects",d:"Capital Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft}].map(x => (
             <div key={x.l} style={{ background:x.c.light, borderTop:`3px solid ${x.c.bg}`, borderRadius:10, padding:"12px 14px" }}>
               <div style={{ fontWeight:800, fontSize:14, color:x.c.bg, marginBottom:4 }}>{x.l}</div>
               <div style={{ fontSize:11, color:x.c.text }}>{x.d}</div>
@@ -477,7 +477,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
         <Card>
           <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>👥 Department Prefixes (Level 1)</div>
           <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:10, marginBottom:20 }}>
-            {[{ab:"EOM",f:"Enterprise Ops & Maintenance",c:C.eom},{ab:"PRJ",f:"Capital Projects",c:C.pt},{ab:"CS",f:"Customer Service",c:C.cst},{ab:"FF",f:"Fire Fighting",c:C.fft}].map(d => (
+            {[{ab:"EOM",f:"Emergency Ops & Maintenance",c:C.eom},{ab:"PRJ",f:"Capital Projects",c:C.pt},{ab:"CS",f:"Customer Service",c:C.cst},{ab:"FF",f:"Fire Fighting",c:C.fft}].map(d => (
               <div key={d.ab} style={{ borderLeft:`3px solid ${d.c.bg}`, paddingLeft:12, paddingTop:4, paddingBottom:4 }}>
                 <div style={{ fontWeight:900, fontSize:18, color:d.c.bg }}>{d.ab}</div>
                 <div style={{ fontSize:11, color:C.slate, marginTop:2 }}>{d.f}</div>
@@ -498,7 +498,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
         </Card>
         <Card>
           <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>Generated Territory Examples</div>
-          {[{code:"EOM-AUH",desc:"Ops Team in Abu Dhabi",tag:"OPERATIONS",c:C.eom},{code:"PRJ-DXB",desc:"Projects Team in Dubai",tag:"PROJECTS",c:C.pt},{code:"CS-AUH",desc:"Support Team in Abu Dhabi",tag:"SERVICE",c:C.cst},{code:"FF-SHJ",desc:"Fire Fighting Team in Sharjah",tag:"FIRE FIGHTING",c:C.fft}].map(t => (
+          {[{code:"EOM-AUH",desc:"Ops Team in Abu Dhabi",tag:"OPERATIONS",c:C.eom},{code:"PRJ-DXB",desc:"Projects Team in Dubai",tag:"Projects",c:C.pt},{code:"CS-AUH",desc:"Support Team in Abu Dhabi",tag:"SERVICE",c:C.cst},{code:"FF-SHJ",desc:"Fire Fighting Team in Sharjah",tag:"FIRE FIGHTING",c:C.fft}].map(t => (
             <div key={t.code} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", marginBottom:8 }}>
               <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>{t.code}</div><div style={{ fontSize:11, color:C.slate, marginTop:2 }}>{t.desc}</div></div>
               <Pill label={t.tag} bg={t.c.light} color={t.c.bg} />
