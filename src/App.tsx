@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 const C = {
   navy:"#0d1b2e", navyMid:"#1a2f4a", teal:"#0e9e8e", tealLight:"#d0f5f1",
@@ -201,11 +201,15 @@ type DotProps = {
   color?: string;
 };
 
+type ResponsiveProps = {
+  isMobile: boolean;
+};
+
 function SectionHeader({ eyebrow, title, subtitle }: SectionHeaderProps) {
   return (
     <div style={{ marginBottom:28 }}>
       <div style={{ fontSize:11, fontWeight:700, letterSpacing:2, textTransform:"uppercase", color:C.teal, marginBottom:6 }}>{eyebrow}</div>
-      <h2 style={{ margin:0, fontSize:26, fontWeight:900, color:C.navy, lineHeight:1.2, fontFamily:"Georgia,serif" }}>{title}</h2>
+      <h2 style={{ margin:0, fontSize:"clamp(20px, 4vw, 26px)", fontWeight:900, color:C.navy, lineHeight:1.2, fontFamily:"Georgia,serif" }}>{title}</h2>
       {subtitle && <p style={{ margin:"8px 0 0", fontSize:14, color:C.slate, lineHeight:1.65, maxWidth:700 }}>{subtitle}</p>}
     </div>
   );
@@ -221,16 +225,16 @@ function Dot({ color }: DotProps) {
 }
 
 // ─── STRATEGY ─────────────────────────────────────────
-function StrategySection() {
+function StrategySection({ isMobile }: ResponsiveProps) {
   return (
     <div>
-      <div style={{ background:`linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, borderRadius:18, padding:"44px 48px", marginBottom:24, position:"relative", overflow:"hidden" }}>
+      <div style={{ background:`linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, borderRadius:18, padding:isMobile ? "26px 20px" : "44px 48px", marginBottom:24, position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute", right:-60, top:-60, width:300, height:300, borderRadius:"50%", border:"2px solid rgba(14,158,142,0.12)", pointerEvents:"none" }} />
         <div style={{ position:"absolute", right:40, bottom:-40, width:200, height:200, borderRadius:"50%", border:"1px solid rgba(232,146,42,0.12)", pointerEvents:"none" }} />
         <Pill label="ZOHO FSM · SERGAS" bg="rgba(14,158,142,0.18)" color={C.teal} style={{ marginBottom:14 }} />
-        <h1 style={{ margin:"0 0 12px", fontSize:36, fontWeight:900, color:C.white, lineHeight:1.15, fontFamily:"Georgia,serif" }}>Centralized Implementation<br/>Strategy</h1>
+        <h1 style={{ margin:"0 0 12px", fontSize:isMobile ? "clamp(22px,6vw,28px)" : 36, fontWeight:900, color:C.white, lineHeight:1.15, fontFamily:"Georgia,serif" }}>Centralized Implementation<br/>Strategy</h1>
         <p style={{ margin:"0 0 28px", fontSize:15, color:"rgba(255,255,255,0.6)", maxWidth:560, lineHeight:1.65 }}>One Platform. Multiple Departments. Full Control. — Unifying diverse operations into a single, cohesive ecosystem.</p>
-        <div style={{ display:"flex", gap:14 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,1fr)", gap:14 }}>
           {[["⚖","Governance","Standardized protocols across all units"],["🔗","Integration","Seamless data flow: CRM ↔ FSM"],["📈","Scalability","Ready for multi-region expansion"]].map(([ic,t,d]) => (
             <div key={t} style={{ background:"rgba(255,255,255,0.06)", borderRadius:12, padding:"14px 18px", borderLeft:`3px solid ${C.teal}`, flex:1 }}>
               <div style={{ fontSize:22, marginBottom:6 }}>{ic}</div>
@@ -241,7 +245,7 @@ function StrategySection() {
         </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:16, marginBottom:24 }}>
         <Card style={{ borderTop:`3px solid #dc2626` }}>
           <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:14 }}>
             <div style={{ background:"#fef2f2", borderRadius:8, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center" }}>⚠️</div>
@@ -273,7 +277,7 @@ function StrategySection() {
       </div>
 
       <Card style={{ marginBottom:24 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexDirection:isMobile ? "column" : "row", gap:isMobile ? 12 : 0, marginBottom:16 }}>
           <div>
             <div style={{ fontSize:10, fontWeight:700, color:C.teal, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Business Objective</div>
             <div style={{ fontWeight:900, fontSize:18, color:C.navy }}>Unified FSM Hub — Central Control</div>
@@ -281,7 +285,7 @@ function StrategySection() {
           </div>
           <div style={{ background:C.navy, borderRadius:12, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>🌐</div>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:10 }}>
           {[{l:"EOM",d:"Enterprise Operations & Maintenance",c:C.eom},{l:"Projects",d:"Capital Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft}].map(x => (
             <div key={x.l} style={{ background:x.c.light, borderTop:`3px solid ${x.c.bg}`, borderRadius:10, padding:"12px 14px" }}>
               <div style={{ fontWeight:800, fontSize:14, color:x.c.bg, marginBottom:4 }}>{x.l}</div>
@@ -292,7 +296,7 @@ function StrategySection() {
       </Card>
 
       <SectionHeader eyebrow="Critical Success Factors" title="Five Pillars of Success" subtitle="Required to ensure system stability and user adoption across all departments" />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:12 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(5,1fr)", gap:12 }}>
         {[{n:"01",ic:"🗄",t:"Clean CRM Data",c:C.teal,d:"Accurate master data (Assets, Accounts, Contacts) is the foundation. Legacy data must be cleansed before migration — garbage in, garbage out."},
           {n:"02",ic:"🗺",t:"Correct Territory Mapping",c:"#2563eb",d:"Logical separation of EOM, Projects, and Fire Fighting is critical. Incorrect mapping breaks access controls and reporting logic."},
           {n:"03",ic:"🔗",t:"Strong Integration Logic",c:"#6d28d9",d:"The API handshake between CRM and FSM must be robust. Sync failures cause operational delays and status mismatches."},
@@ -311,11 +315,11 @@ function StrategySection() {
 }
 
 // ─── ARCHITECTURE ─────────────────────────────────────
-function ArchitectureSection() {
+function ArchitectureSection({ isMobile }: ResponsiveProps) {
   return (
     <div>
       <SectionHeader eyebrow="System Architecture" title="Architecture Overview" subtitle="Clear delineation between Master Data management and Field Execution" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr auto 1fr", gap:20, alignItems:"center", marginBottom:24 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr auto 1fr", gap:20, alignItems:"center", marginBottom:24 }}>
         <Card style={{ borderTop:`4px solid ${C.navy}` }}>
           <div style={{ display:"flex", gap:12, alignItems:"center", marginBottom:16 }}>
             <div style={{ background:C.navy, borderRadius:10, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>🗄</div>
@@ -325,16 +329,16 @@ function ArchitectureSection() {
             <div key={item} style={{ display:"flex", gap:10, alignItems:"center", padding:"8px 0", borderBottom:`1px solid ${C.border}` }}><Dot color={C.slate} /><span style={{ fontSize:13, color:"#334155" }}>{item}</span></div>
           ))}
         </Card>
-        <div style={{ display:"flex", flexDirection:"column", gap:12, alignItems:"center" }}>
-          <div style={{ background:C.amberLight, border:`1px solid ${C.amber}40`, borderRadius:10, padding:"10px 16px", textAlign:"center", width:140 }}>
+        <div style={{ display:"flex", flexDirection:isMobile ? "row" : "column", gap:12, alignItems:"center", justifyContent:"center" }}>
+          <div style={{ background:C.amberLight, border:`1px solid ${C.amber}40`, borderRadius:10, padding:"10px 16px", textAlign:"center", width:isMobile ? "auto" : 140 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.amber, textTransform:"uppercase", letterSpacing:1 }}>Master Data Push</div>
             <div style={{ fontSize:24, margin:"4px 0", color:C.amber }}>→</div>
             <div style={{ fontSize:11, fontWeight:700, color:"#92400e" }}>Sync Data</div>
           </div>
-          <div style={{ background:"#f0fdf4", border:"1px solid #86efac", borderRadius:10, padding:"8px 16px", textAlign:"center", width:140 }}>
+          <div style={{ background:"#f0fdf4", border:"1px solid #86efac", borderRadius:10, padding:"8px 16px", textAlign:"center", width:isMobile ? "auto" : 140 }}>
             <div style={{ fontSize:11, fontWeight:700, color:"#15803d" }}>API Integration</div>
           </div>
-          <div style={{ background:C.tealLight, border:`1px solid ${C.teal}40`, borderRadius:10, padding:"10px 16px", textAlign:"center", width:140 }}>
+          <div style={{ background:C.tealLight, border:`1px solid ${C.teal}40`, borderRadius:10, padding:"10px 16px", textAlign:"center", width:isMobile ? "auto" : 140 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.teal, textTransform:"uppercase", letterSpacing:1 }}>Status Updates</div>
             <div style={{ fontSize:24, margin:"4px 0", color:C.teal }}>←</div>
             <div style={{ fontSize:11, fontWeight:700, color:"#0f766e" }}>Real-time Status</div>
@@ -351,13 +355,13 @@ function ArchitectureSection() {
         </Card>
       </div>
 
-      <div style={{ background:C.amberLight, border:`1px solid ${C.amber}40`, borderRadius:12, padding:"14px 20px", marginBottom:28, display:"flex", gap:14 }}>
+      <div style={{ background:C.amberLight, border:`1px solid ${C.amber}40`, borderRadius:12, padding:isMobile ? "12px 14px" : "14px 20px", marginBottom:28, display:"flex", flexDirection:isMobile ? "column" : "row", gap:14 }}>
         <span style={{ fontSize:24, flexShrink:0 }}>💡</span>
         <div><span style={{ fontWeight:800, fontSize:13, color:C.navy }}>Architecture Principle: </span><span style={{ fontSize:13, color:"#7c3d12", lineHeight:1.7 }}>CRM acts as the "Single Source of Truth" for all customer and asset data. FSM is strictly for operational execution, consuming data from CRM and returning job completion status via API.</span></div>
       </div>
 
       <SectionHeader eyebrow="Data Governance" title="Asset Strategy Flow" subtitle="Controlled data propagation from Master CRM to Field Execution" />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:28 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:14, marginBottom:28 }}>
         {[{n:1,t:"CRM Main Asset",c:"#2563eb",l:"#eff6ff",rows:[["Master Record","Created & managed by Back Office"],["Details","Purchase Date, Warranty, Location, Contract"],["Ownership","Full Read/Write access"]]},
           {n:2,t:"FSM Service Asset",c:C.teal,l:C.tealLight,rows:[["Operational Replica","Synced automatically via API"],["Enhancement","QR Codes generated for tagging"],["Access","Read-Only for basic details"]]},
           {n:3,t:"Child Assets",c:"#15803d",l:"#f0fdf4",rows:[["Components","Sub-parts linked to Parent Asset"],["Granularity","Allows specific maintenance tracking"],["Mapping","Inherits territory from Parent"]]},
@@ -377,7 +381,7 @@ function ArchitectureSection() {
 
       <SectionHeader eyebrow="Lifecycle Alignment" title="Status Synchronization" subtitle="Real-time status mapping between Field Operations and Back Office" />
       <Card style={{ marginBottom:28 }}>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr auto 1fr", gap:0 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr auto 1fr", gap:0 }}>
           <div>
             <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:14 }}>
               <div style={{ background:C.teal, borderRadius:8, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center" }}>🔧</div>
@@ -387,7 +391,7 @@ function ArchitectureSection() {
               <div key={st.s} style={{ background:st.bg, borderRadius:8, padding:"9px 14px", marginBottom:6, fontSize:13, fontWeight:600, color:st.c }}>{st.s}</div>
             ))}
           </div>
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", padding:"0 24px", gap:38, paddingTop:50 }}>
+          <div style={{ display:isMobile ? "none" : "flex", flexDirection:"column", justifyContent:"center", alignItems:"center", padding:"0 24px", gap:38, paddingTop:50 }}>
             {["⇄","⇄","✓","⇄","✓","⇄"].map((ic,i) => <div key={i} style={{ fontSize:16, color:ic==="✓"?C.teal:C.slate, fontWeight:700 }}>{ic}</div>)}
           </div>
           <div>
@@ -407,7 +411,7 @@ function ArchitectureSection() {
       </Card>
 
       <SectionHeader eyebrow="Process Efficiency" title="Work Order Automation" subtitle="Automated transition from CRM Snag reporting to Field Execution" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1.4fr 1fr", gap:16 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1.4fr 1fr", gap:16 }}>
         <Card style={{ borderTop:`3px solid ${C.amber}` }}>
           <Pill label="TRIGGER SOURCE" bg={C.amberLight} color={C.amber} />
           <h3 style={{ margin:"12px 0 6px", fontSize:18, fontWeight:900, color:C.navy }}>ZOHO CRM Snag</h3>
@@ -451,13 +455,13 @@ function ArchitectureSection() {
 }
 
 // ─── TERRITORIES ──────────────────────────────────────
-function TerritoriesSection() {
+function TerritoriesSection({ isMobile }: ResponsiveProps) {
   return (
     <div>
       <SectionHeader eyebrow="Structured Organization" title="Territory Structure Strategy" subtitle="Standardized naming conventions for logical data separation across departments and regions" />
       <Card style={{ marginBottom:24, textAlign:"center" }}>
         <div style={{ fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1.5, marginBottom:20 }}>Naming Convention Formula</div>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:16, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:isMobile ? 8 : 16, flexWrap:"wrap" }}>
           {[["Department Prefix","PREFIX","border"],["Geographic Code","LOCATION","border"],["Unique Territory Name","PREFIX-LOCATION","filled"]].map(([label,val,style],i) => (
             <div key={val} style={{ display:"flex", alignItems:"center", gap:16 }}>
               {i>0 && <div style={{ fontSize:28, color:C.slate, fontWeight:300 }}>{i===2?"=":"+"}</div>}
@@ -469,10 +473,10 @@ function TerritoriesSection() {
           ))}
         </div>
       </Card>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:28 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:20, marginBottom:28 }}>
         <Card>
           <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>👥 Department Prefixes (Level 1)</div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:20 }}>
+          <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:10, marginBottom:20 }}>
             {[{ab:"EOM",f:"Enterprise Ops & Maintenance",c:C.eom},{ab:"PRJ",f:"Capital Projects",c:C.pt},{ab:"CS",f:"Customer Service",c:C.cst},{ab:"FF",f:"Fire Fighting",c:C.fft}].map(d => (
               <div key={d.ab} style={{ borderLeft:`3px solid ${d.c.bg}`, paddingLeft:12, paddingTop:4, paddingBottom:4 }}>
                 <div style={{ fontWeight:900, fontSize:18, color:d.c.bg }}>{d.ab}</div>
@@ -507,7 +511,7 @@ function TerritoriesSection() {
       </div>
 
       <SectionHeader eyebrow="Security & Governance" title="Territory-Based Access Control" subtitle="Hierarchical data security model ensuring operational integrity" />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:14, marginBottom:20 }}>
         {[{n:1,ic:"👤",t:"System User",c:C.navy,d:"Technician or Back Office staff logs into the FSM portal or mobile app."},
           {n:2,ic:"🪪",t:"Assigned Role",c:"#2563eb",d:"Profile determines functional capabilities (e.g., 'View Only' vs 'Edit')."},
           {n:3,ic:"🗺",t:"Territory Scope",c:C.teal,d:"User is linked to specific location codes (e.g., EOM-AUH).",badge:"ROADMAP: ETA 4–5 Weeks"},
@@ -523,7 +527,7 @@ function TerritoriesSection() {
           </div>
         ))}
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:14 }}>
         <Card style={{ borderLeft:`4px solid #dc2626` }}><div style={{ fontWeight:800, fontSize:14, color:C.navy, marginBottom:6 }}>🛡 Data Isolation</div><p style={{ margin:0, fontSize:13, color:C.slate, lineHeight:1.65 }}>Technicians in Dubai (DXB) cannot view or modify assets in Abu Dhabi (AUH), preventing accidental cross-region errors.</p></Card>
         <Card style={{ borderLeft:`4px solid ${C.teal}` }}><div style={{ fontWeight:800, fontSize:14, color:C.navy, marginBottom:6 }}>🔄 Dynamic Updates</div><p style={{ margin:0, fontSize:13, color:C.slate, lineHeight:1.65 }}>If a technician moves permanently, updating their User Profile Territory immediately grants access to the new region's data.</p></Card>
       </div>
@@ -532,13 +536,13 @@ function TerritoriesSection() {
 }
 
 // ─── TEAMS ────────────────────────────────────────────
-function TeamsSection() {
+function TeamsSection({ isMobile }: ResponsiveProps) {
   const [active, setActive] = useState("eom");
   const team = teams.find(t => t.id === active);
   return (
     <div>
       <SectionHeader eyebrow="Field Operations" title="Teams & Territories" subtitle="Five specialized teams operating within the unified FSM ecosystem" />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:10, marginBottom:24 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr 1fr" : "repeat(5,1fr)", gap:10, marginBottom:24 }}>
         {teams.map(t => (
           <div key={t.id} onClick={() => setActive(t.id)} style={{ background:active===t.id?t.color.bg:C.white, border:`2px solid ${t.color.border}`, borderRadius:14, padding:16, cursor:"pointer", transition:"all 0.2s", boxShadow:active===t.id?`0 6px 20px ${t.color.bg}40`:"0 2px 6px rgba(0,0,0,0.04)" }}>
             <Pill label={t.abbr} bg={active===t.id?"rgba(255,255,255,0.2)":t.color.bg} color="#fff" style={{ marginBottom:10 }} />
@@ -548,7 +552,7 @@ function TeamsSection() {
         ))}
       </div>
       {team && (
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:28 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:14, marginBottom:28 }}>
           {[{title:"👤 Agents / Roles",items:team.agents},{title:"📋 Work Order Types",items:team.woTypes},{title:"🔧 Service Catalogue",items:team.services},{title:"🔄 PPM Schedule",items:team.ppm}].map(block => (
             <Card key={block.title} style={{ borderTop:`3px solid ${team.color.bg}` }}>
               <div style={{ fontWeight:700, fontSize:12, color:team.color.bg, marginBottom:12 }}>{block.title}</div>
@@ -563,7 +567,7 @@ function TeamsSection() {
       )}
 
       <SectionHeader eyebrow="Service Execution" title="Job Sheet Templates" subtitle="Four core service execution templates requiring final stakeholder sign-off" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:28 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:14, marginBottom:28 }}>
         {[{ic:"📅",t:"PPM Checklist",sub:"Quarterly & Annual Maintenance",tag:"TO FINALIZE",tagC:C.amber,tagBg:C.amberLight,c:C.teal,items:[["Asset Details","MANDATORY"],["50-Point Checklist","PASS/FAIL"],["Condition Photos","MIN 4"],["Tech Signature","REQ"]]},
           {ic:"🔧",t:"Normal Service",sub:"Reactive Repairs & Call-outs",tag:"IN REVIEW",tagC:"#2563eb",tagBg:"#eff6ff",c:C.navy,items:[["Time Logs","BILLABLE"],["Materials Used","INVENTORY"],["Before/After Photos","PROOF"],["Customer Sign-off","MANDATORY"]]},
           {ic:"🔴",t:"Fire Fighting Insp.",sub:"Safety Compliance Audits",tag:"TO FINALIZE",tagC:C.amber,tagBg:C.amberLight,c:C.eom.bg,items:[["Tag Scanning","QR CODE"],["Pressure Checks","VALUES"],["Defect Logging","CRITICAL"],["Certification","AUTO-GEN"]]},
@@ -576,7 +580,7 @@ function TeamsSection() {
               </div>
               <Pill label={tpl.tag} bg={tpl.tagBg} color={tpl.tagC} />
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+            <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:8 }}>
               {tpl.items.map(([name,type]) => (
                 <div key={name} style={{ background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:8, padding:"8px 10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                   <span style={{ fontSize:12, color:"#334155", fontWeight:500 }}>{name}</span>
@@ -589,7 +593,7 @@ function TeamsSection() {
       </div>
 
       <SectionHeader eyebrow="Project Hierarchy" title="Large Work Order Management" subtitle="Hierarchical breakdown for complex, multi-phase project execution" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:20 }}>
         <Card>
           <div style={{ textAlign:"center", marginBottom:16 }}>
             <div style={{ display:"inline-flex", gap:10, alignItems:"center", background:C.navy, borderRadius:10, padding:"10px 18px" }}>
@@ -598,7 +602,7 @@ function TeamsSection() {
             </div>
           </div>
           <div style={{ display:"flex", justifyContent:"center", marginBottom:4 }}><div style={{ width:2, height:20, background:C.border }} /></div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+          <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:12 }}>
             {[{phase:"Phase 1: Rough-In",wo:"WO-001",sa:"Tech Team A (Mon-Wed)",js:"Execution Tasks & Parts",c:C.teal},{phase:"Phase 2: Final Fit-out",wo:"WO-002",sa:"Tech Team B (Thu-Fri)",js:"Sign-off & Handover",c:"#2563eb"}].map(p => (
               <div key={p.wo} style={{ border:`2px solid ${p.c}30`, borderRadius:10, overflow:"hidden" }}>
                 <div style={{ background:p.c, padding:"8px 12px" }}><div style={{ color:"#fff", fontWeight:700, fontSize:12 }}>{p.phase}</div><div style={{ color:"rgba(255,255,255,0.7)", fontSize:10 }}>Child Work Order ({p.wo})</div></div>
@@ -610,7 +614,7 @@ function TeamsSection() {
             ))}
           </div>
         </Card>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:10 }}>
           {[{ic:"📈",t:"Phase Tracking",d:"Monitor progress per phase (Rough-in vs Finish) independently"},{ic:"💰",t:"Better Reporting",d:"Roll-up costs and hours from child jobs to parent project"},{ic:"👥",t:"Controlled Scheduling",d:"Prevent Phase 2 booking until Phase 1 status is 'Complete'"},{ic:"🛡",t:"SLA Clarity",d:"Define different SLA targets for urgent vs planned phases"}].map(b => (
             <Card key={b.t}><div style={{ fontSize:26, marginBottom:8 }}>{b.ic}</div><div style={{ fontWeight:800, fontSize:13, color:C.navy, marginBottom:6 }}>{b.t}</div><div style={{ fontSize:12, color:C.slate, lineHeight:1.65 }}>{b.d}</div></Card>
           ))}
@@ -621,11 +625,11 @@ function TeamsSection() {
 }
 
 // ─── ASSETS ───────────────────────────────────────────
-function AssetsSection() {
+function AssetsSection({ isMobile }: ResponsiveProps) {
   return (
     <div>
       <SectionHeader eyebrow="Asset Management" title="Asset Hierarchy" subtitle="Parent → Child asset structure mapped to territories across all departments" />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:16, marginBottom:28 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(2,1fr)", gap:16, marginBottom:28 }}>
         {assetHierarchy.map((a,i) => {
           const team = teams.find(t => t.id === a.team);
           if (!team) {
@@ -648,7 +652,7 @@ function AssetsSection() {
         })}
       </div>
       <SectionHeader eyebrow="Configuration" title="Asset Custom Fields" subtitle="Additional fields configured for gas operations data capture" />
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,1fr)", gap:10 }}>
         {[{f:"Asset Code",t:"Text",e:"SERGAS-CGS-001-PRV-A"},{f:"Gas Asset Type",t:"Picklist",e:"PRV / Compressor / Valve…"},{f:"Operating Pressure (bar)",t:"Decimal",e:"10.5"},{f:"Pipeline Material",t:"Picklist",e:"PE / Steel / Cast Iron"},{f:"Last Inspection Date",t:"Date",e:"22/02/2026"},{f:"Next Inspection Due",t:"Date",e:"22/05/2026"},{f:"Risk Level",t:"Picklist",e:"Low / Medium / High / Critical"},{f:"Condition Rating",t:"Picklist",e:"Good / Fair / Poor"},{f:"SCADA Tag",t:"Text",e:"CGS-001-PRV-A-TAG"}].map(x => (
           <Card key={x.f}>
             <div style={{ fontWeight:700, fontSize:13, color:C.navy, marginBottom:8 }}>{x.f}</div>
@@ -661,7 +665,7 @@ function AssetsSection() {
 }
 
 // ─── SERVICE FLOW ─────────────────────────────────────
-function ServiceFlowSection() {
+function ServiceFlowSection({ isMobile }: ResponsiveProps) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const sc = ["#c2410c","#b45309","#d97706","#65a30d","#15803d","#0891b2","#2563eb","#6d28d9","#0f172a"];
   return (
@@ -669,7 +673,7 @@ function ServiceFlowSection() {
       <SectionHeader eyebrow="Operational Logic" title="End-to-End Service Flow" subtitle="From service request to PDF report — complete field execution chain" />
       <Card style={{ marginBottom:24 }}>
         <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>Service Appointment Logic — Execution Chain</div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:16 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:12, marginBottom:16 }}>
           {[{ic:"📋",t:"Work Order",sub:"Parent Object",tag:"Defining the Scope",items:["Customer Details","Location Data","Priority Level","Linked to Asset"]},
             {ic:"≡",t:"Line Items",sub:"Services & Parts",tag:"What needs to be done?",items:["Required Services","Required Parts","Est. Duration","Price Calculation"]},
             {ic:"📅",t:"Service Appt.",sub:"Scheduling Unit",tag:"When & Who?",items:["Start / End Time","Actual Duration","Multi-Day Jobs Support"]},
@@ -684,7 +688,7 @@ function ServiceFlowSection() {
             </div>
           ))}
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,1fr)", gap:10 }}>
           {[{ic:"🗺",t:"Territory Matching",d:"Only techs in 'DXB' can view Dubai jobs."},{ic:"🎓",t:"Skill Requirements",d:"Matches 'Electrician' skill to job type."},{ic:"⏱",t:"Time Tracking",d:"Logs Travel, Work, Break times accurately."}].map(d => (
             <div key={d.t} style={{ background:C.slateLight, borderRadius:10, padding:"10px 14px", display:"flex", gap:12, alignItems:"flex-start" }}>
               <span style={{ fontSize:22 }}>{d.ic}</span>
@@ -693,7 +697,7 @@ function ServiceFlowSection() {
           ))}
         </div>
       </Card>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 300px", gap:20 }}>
         <div>
           {flowSteps.map((s,i) => {
             const isExp = expanded === s.id;
@@ -707,7 +711,7 @@ function ServiceFlowSection() {
                 </div>
                 {isExp && (
                   <div style={{ background:"#f8fafc", border:`2px solid ${sc[i]}`, borderTop:"none", borderRadius:"0 0 12px 12px", padding:16 }}>
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+                    <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:12 }}>
                       <div>
                         <div style={{ fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", marginBottom:6 }}>👤 Performed By</div>
                         <div style={{ background:C.white, borderRadius:8, padding:"8px 12px", border:`1px solid ${sc[i]}40`, fontSize:13, fontWeight:600, color:C.navy, marginBottom:10 }}>{s.who}</div>
@@ -727,7 +731,7 @@ function ServiceFlowSection() {
           })}
         </div>
         <div>
-          <div style={{ background:C.white, borderRadius:16, border:`2px solid ${C.navy}`, boxShadow:"0 4px 16px rgba(0,0,0,0.1)", overflow:"hidden", position:"sticky", top:76 }}>
+          <div style={{ background:C.white, borderRadius:16, border:`2px solid ${C.navy}`, boxShadow:"0 4px 16px rgba(0,0,0,0.1)", overflow:"hidden", position:isMobile ? "static" : "sticky", top:isMobile ? undefined : 76 }}>
             <div style={{ background:C.navy, padding:"12px 16px" }}><div style={{ color:"#fff", fontWeight:700, fontSize:13 }}>📄 Service Report PDF</div><div style={{ color:"rgba(255,255,255,0.5)", fontSize:10, marginTop:2 }}>Auto-generated on WO completion</div></div>
             <div style={{ padding:14 }}>
               <div style={{ background:"#f8fafc", borderRadius:8, padding:10, marginBottom:10, border:`1px solid ${C.border}` }}>
@@ -753,7 +757,7 @@ function ServiceFlowSection() {
 }
 
 // ─── ROADMAP ──────────────────────────────────────────
-function RoadmapSection() {
+function RoadmapSection({ isMobile }: ResponsiveProps) {
   const [scope, setScope] = useState<"process" | "it">("process");
   const [expandedWeek, setExpandedWeek] = useState<string | null>("Week 1");
   const [expandedOos, setExpandedOos] = useState<number | null>(null);
@@ -762,11 +766,11 @@ function RoadmapSection() {
   return (
     <div>
       {/* Hero */}
-      <div style={{ background:`linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, borderRadius:18, padding:"36px 40px", marginBottom:28 }}>
+      <div style={{ background:`linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, borderRadius:18, padding:isMobile ? "24px 18px" : "36px 40px", marginBottom:28 }}>
         <Pill label="STRATEGIC EXECUTION — 4 WEEK PLAN" bg="rgba(14,158,142,0.18)" color={C.teal} style={{ marginBottom:12 }} />
         <h2 style={{ margin:"0 0 8px", fontSize:28, fontWeight:900, color:C.white, fontFamily:"Georgia,serif" }}>Implementation Roadmap</h2>
         <p style={{ margin:"0 0 24px", fontSize:14, color:"rgba(255,255,255,0.6)", lineHeight:1.6 }}>Compressed 4-week delivery plan — dual-track execution. Select a scope to view its detailed activity schedule.</p>
-        <div style={{ display:"flex", gap:12 }}>
+        <div style={{ display:"flex", gap:12, flexDirection:isMobile ? "column" : "row" }}>
           {[{id:"process",label:"👔 Process Owner Scope",sub:"Business decisions, UAT, approvals & training"},
             {id:"it",label:"💻 IT Scope",sub:"Configuration, integration & testing"}].map(s => (
             <div key={s.id} onClick={() => { setScope(s.id as "process" | "it"); setExpandedWeek("Week 1"); }} style={{ flex:1, borderRadius:12, padding:"14px 18px", cursor:"pointer", transition:"all 0.2s", background:scope===s.id?C.white:"rgba(255,255,255,0.06)", border:scope===s.id?`2px solid ${C.teal}`:"2px solid rgba(255,255,255,0.1)" }}>
@@ -778,7 +782,7 @@ function RoadmapSection() {
       </div>
 
       {/* Week selector */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:12, marginBottom:20 }}>
         {data.map(w => (
           <div key={w.week} onClick={() => setExpandedWeek(expandedWeek===w.week?null:w.week)} style={{ borderRadius:12, padding:"14px 16px", cursor:"pointer", transition:"all 0.2s", background:expandedWeek===w.week?w.color:w.light, border:`2px solid ${expandedWeek===w.week?w.color:w.color+"40"}`, boxShadow:expandedWeek===w.week?`0 6px 20px ${w.color}40`:"none" }}>
             <div style={{ fontWeight:900, fontSize:18, color:expandedWeek===w.week?"#fff":w.color, marginBottom:3 }}>{w.week}</div>
@@ -794,8 +798,8 @@ function RoadmapSection() {
       {/* Week detail table */}
       {data.map(w => expandedWeek===w.week && (
         <Card key={w.week} style={{ marginBottom:24, border:`2px solid ${w.color}30` }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, paddingBottom:14, borderBottom:`1px solid ${C.border}` }}>
-            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:isMobile ? "flex-start" : "center", flexDirection:isMobile ? "column" : "row", gap:isMobile ? 10 : 0, marginBottom:18, paddingBottom:14, borderBottom:`1px solid ${C.border}` }}>
+            <div style={{ display:"flex", alignItems:isMobile ? "flex-start" : "center", flexDirection:isMobile ? "column" : "row", gap:12 }}>
               <div style={{ background:w.color, borderRadius:10, padding:"8px 18px" }}>
                 <div style={{ fontWeight:900, fontSize:15, color:"#fff" }}>{w.week}</div>
                 <div style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>{w.days}</div>
@@ -807,14 +811,24 @@ function RoadmapSection() {
             </div>
             <Pill label={scope==="process"?"PROCESS OWNER":"IT SCOPE"} bg={w.light} color={w.color} />
           </div>
-          {/* Table header */}
-          <div style={{ display:"grid", gridTemplateColumns:"2.2fr 1.2fr 0.65fr 1.5fr", background:"#f8fafc", borderRadius:"8px 8px 0 0", border:`1px solid ${C.border}` }}>
+          {/* Table header - hidden on mobile */}
+          {!isMobile && <div style={{ display:"grid", gridTemplateColumns:"2.2fr 1.2fr 0.65fr 1.5fr", background:"#f8fafc", borderRadius:"8px 8px 0 0", border:`1px solid ${C.border}` }}>
             {["Activity","Responsible","Deadline","Notes / Dependencies"].map((h,hi) => (
               <div key={h} style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, borderRight:hi<3?`1px solid ${C.border}`:"none" }}>{h}</div>
             ))}
-          </div>
+          </div>}
           {/* Table rows */}
           {w.tasks.map((task,i) => (
+            isMobile ? (
+              <div key={i} style={{ background:i%2===0?C.white:"#fafbfc", border:`1px solid ${C.border}`, borderRadius:8, padding:"12px 14px", marginBottom:8 }}>
+                <div style={{ fontWeight:700, fontSize:13, color:C.navy, lineHeight:1.35, marginBottom:6 }}>{task.activity}</div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4 }}>
+                  <div style={{ fontSize:11, color:"#334155" }}>{task.responsible}</div>
+                  <Pill label={task.deadline} bg={w.light} color={w.color} style={{ fontSize:10 }} />
+                </div>
+                <div style={{ fontSize:11, color:C.slate, lineHeight:1.6 }}>{task.note}</div>
+              </div>
+            ) : (
             <div key={i} style={{ display:"grid", gridTemplateColumns:"2.2fr 1.2fr 0.65fr 1.5fr", background:i%2===0?C.white:"#fafbfc", borderLeft:`1px solid ${C.border}`, borderRight:`1px solid ${C.border}`, borderBottom:i<w.tasks.length-1?`1px solid ${C.border}`:undefined, borderRadius:i===w.tasks.length-1?"0 0 8px 8px":undefined }}>
               <div style={{ padding:"11px 12px", borderRight:`1px solid ${C.border}` }}>
                 <div style={{ fontWeight:700, fontSize:13, color:C.navy, lineHeight:1.35 }}>{task.activity}</div>
@@ -829,14 +843,15 @@ function RoadmapSection() {
                 <div style={{ fontSize:11, color:C.slate, lineHeight:1.6 }}>{task.note}</div>
               </div>
             </div>
+            )
           ))}
           <div style={{ height:1, background:C.border, borderRadius:"0 0 8px 8px" }} />
         </Card>
       ))}
 
       {/* ── OUT OF IMPLEMENTATION SCOPE ── */}
-      <div style={{ background:"#fff8f0", border:`2px solid ${C.amber}`, borderRadius:16, padding:"24px 28px", marginBottom:28 }}>
-        <div style={{ display:"flex", gap:14, alignItems:"flex-start", marginBottom:20 }}>
+      <div style={{ background:"#fff8f0", border:`2px solid ${C.amber}`, borderRadius:16, padding:isMobile ? "16px 14px" : "24px 28px", marginBottom:28 }}>
+        <div style={{ display:"flex", gap:14, alignItems:"flex-start", flexDirection:isMobile ? "column" : "row", marginBottom:20 }}>
           <div style={{ background:C.amber, borderRadius:10, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>⚠️</div>
           <div>
             <div style={{ fontSize:10, fontWeight:700, color:C.amber, textTransform:"uppercase", letterSpacing:2, marginBottom:4 }}>Scope Boundary</div>
@@ -845,7 +860,7 @@ function RoadmapSection() {
           </div>
         </div>
 
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:16, marginBottom:20 }}>
           {outOfScopeItems.map((item, i) => (
             <div key={i} style={{ background:C.white, border:`1.5px solid ${C.amber}40`, borderRadius:12, overflow:"hidden" }}>
               <div onClick={() => setExpandedOos(expandedOos===i?null:i)} style={{ padding:"14px 18px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", background:expandedOos===i?"#fff3e0":C.white, transition:"background 0.15s" }}>
@@ -885,7 +900,7 @@ function RoadmapSection() {
 
       {/* Capabilities */}
       <SectionHeader eyebrow="Platform Readiness" title="System Capabilities" subtitle="Available now vs upcoming enhancements on the Zoho FSM roadmap" />
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:20 }}>
         <Card style={{ borderTop:`3px solid ${C.teal}` }}>
           <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:16 }}>
             <div style={{ background:"#dcfce7", border:"1px solid #86efac", borderRadius:"50%", width:28, height:28, display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:700, color:"#15803d" }}>✓</div>
@@ -931,24 +946,61 @@ const navTabs = [
 type TabId = (typeof navTabs)[number]["id"];
 
 export default function App() {
+  const getIsMobileViewport = () => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    const widths = [
+      window.innerWidth,
+      window.outerWidth,
+      document.documentElement?.clientWidth,
+      document.body?.clientWidth,
+      document.body?.getBoundingClientRect().width,
+      window.visualViewport?.width,
+      window.screen?.width,
+    ].filter((w): w is number => typeof w === "number" && Number.isFinite(w) && w > 0);
+
+    const minWidth = widths.length ? Math.min(...widths) : window.innerWidth;
+    return window.matchMedia("(max-width: 480px)").matches || minWidth <= 480;
+  };
+
+  const [isMobile, setIsMobile] = useState(() => getIsMobileViewport());
   const [tab, setTab] = useState<TabId>("strategy");
-  const map: Record<TabId, ReactNode> = { strategy:<StrategySection/>, architecture:<ArchitectureSection/>, territories:<TerritoriesSection/>, teams:<TeamsSection/>, assets:<AssetsSection/>, flow:<ServiceFlowSection/>, roadmap:<RoadmapSection/> };
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(getIsMobileViewport());
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const map: Record<TabId, ReactNode> = { strategy:<StrategySection isMobile={isMobile} />, architecture:<ArchitectureSection isMobile={isMobile} />, territories:<TerritoriesSection isMobile={isMobile} />, teams:<TeamsSection isMobile={isMobile} />, assets:<AssetsSection isMobile={isMobile} />, flow:<ServiceFlowSection isMobile={isMobile} />, roadmap:<RoadmapSection isMobile={isMobile} /> };
   return (
-    <div style={{ fontFamily:"'Trebuchet MS','Gill Sans',sans-serif", background:"#eef2f7", minHeight:"100vh" }}>
+    <div style={{ fontFamily:"'Trebuchet MS','Gill Sans',sans-serif", background:"#eef2f7", minHeight:"100vh", overflowX:"hidden", WebkitTextSizeAdjust:"100%" as any }}>
       <div style={{ background:C.navy, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
-        <div style={{ maxWidth:1200, margin:"0 auto", padding:"0 24px", display:"flex", alignItems:"center" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"14px 20px 14px 0", borderRight:`1px solid rgba(255,255,255,0.1)`, marginRight:16, flexShrink:0 }}>
+        <div style={{ maxWidth:1200, margin:"0 auto", padding:isMobile ? "0 8px" : "0 24px", display:"flex", flexDirection:isMobile ? "column" : "row", alignItems:isMobile ? "stretch" : "center" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, padding:isMobile ? "10px 4px 8px" : "14px 20px 14px 0", borderRight:isMobile ? "none" : `1px solid rgba(255,255,255,0.1)`, borderBottom:isMobile ? `1px solid rgba(255,255,255,0.1)` : "none", marginRight:isMobile ? 0 : 16, flexShrink:0 }}>
             <div style={{ background:C.teal, borderRadius:8, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>🔧</div>
             <div><div style={{ color:C.white, fontWeight:900, fontSize:14, lineHeight:1 }}>ZOHO FSM</div><div style={{ color:"rgba(255,255,255,0.4)", fontSize:10, marginTop:2 }}>SERGAS Implementation</div></div>
           </div>
-          <div style={{ display:"flex", gap:0, overflowX:"auto" }}>
+          <div style={{ display:"flex", gap:0, overflowX:"auto", WebkitOverflowScrolling:"touch" as any }}>
             {navTabs.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding:"16px 13px", border:"none", cursor:"pointer", fontSize:12, fontWeight:700, background:"transparent", color:tab===t.id?C.white:"rgba(255,255,255,0.45)", borderBottom:tab===t.id?`3px solid ${C.teal}`:"3px solid transparent", transition:"all 0.2s", whiteSpace:"nowrap", flexShrink:0 }}>{t.label}</button>
+              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding:isMobile ? "10px 10px" : "16px 13px", border:"none", cursor:"pointer", fontSize:isMobile ? 11 : 12, fontWeight:700, background:"transparent", color:tab===t.id?C.white:"rgba(255,255,255,0.45)", borderBottom:tab===t.id?`3px solid ${C.teal}`:"3px solid transparent", transition:"all 0.2s", whiteSpace:"nowrap", flexShrink:0 }}>{t.label}</button>
             ))}
           </div>
         </div>
       </div>
-      <div style={{ maxWidth:1200, margin:"0 auto", padding:"32px 24px 64px" }}>{map[tab]}</div>
+      <div style={{ maxWidth:1200, margin:"0 auto", padding:isMobile ? "20px 12px 40px" : "32px 24px 64px" }}>{map[tab]}</div>
       <div style={{ background:C.navy, padding:"16px 24px", textAlign:"center" }}>
         <div style={{ color:"rgba(255,255,255,0.3)", fontSize:11, fontWeight:600, letterSpacing:1 }}>ZOHO FSM · SERGAS Centralized Implementation Strategy · One Platform. Multiple Departments. Full Control.</div>
       </div>
