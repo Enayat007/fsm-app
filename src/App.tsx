@@ -85,14 +85,14 @@ const assetHierarchy = [
 const processOwnerRoadmap = [
   { week:"Week 1", days:"Days 1–5", color:"#2563eb", light:"#eff6ff", tasks:[
     { activity:"Kick-off Workshop with All Dept. Heads", responsible:"Process Owner + Dept. Heads (EOM, CS, FF, PRJ)", deadline:"Day 1", note:"Set expectations, confirm scope & department leads" },
-    { activity:"Define & Agree Territory Structure", responsible:"Process Owner + Dept. Heads", deadline:"Day 2", note:"Confirm PREFIX-LOCATION naming; approve territory list" },
+    { activity:"Define & Agree Territory Structure", responsible:"Dept. Heads + IT", deadline:"Day 2", note:"Confirm PREFIX-LOCATION naming; approve territory list" },
     { activity:"Review & Validate Service Catalogue per Dept.", responsible:"Each Department Head", deadline:"Day 3", note:"Confirm services, WO types, priority levels per team" },
     { activity:"Collect & Cleanse Asset Master Data from CRM", responsible:"Process Owner + IT", deadline:"Day 3–4", note:"Export assets; validate fields, remove duplicates" },
-    { activity:"Approve Job Sheet Templates (4 types)", responsible:"Dept. Heads + HSE Lead", deadline:"Day 5", note:"PPM Checklist, Normal Service, FF Inspection, Project Completion" },
-    { activity:"Define PPM Schedules per Asset Type", responsible:"EOM / GDT Dept. Heads", deadline:"Day 5", note:"Confirm frequency: monthly, quarterly, semi-annual, annual" },
+    { activity:"Approve Job Sheet Templates (4 types)", responsible:"Dept. Heads", deadline:"Day 5", note:"PPM Checklist, Normal Service, FF Inspection, Project Completion" },
+    { activity:"Define PPM Schedules per Asset Type", responsible:"Dept. Heads", deadline:"Day 5", note:"Confirm frequency: monthly, quarterly, semi-annual, annual" },
   ]},
   { week:"Week 2", days:"Days 6–10", color:"#0e9e8e", light:"#d0f5f1", tasks:[
-    { activity:"User Role Matrix Sign-off", responsible:"Process Owner + HR / IT", deadline:"Day 6", note:"Define roles: Technician, Dispatcher, Supervisor, Back Office" },
+    { activity:"User Role Matrix Sign-off", responsible:"Dept. Heads + IT", deadline:"Day 6", note:"Define roles: Technician, Dispatcher, Supervisor, Back Office" },
     { activity:"Territory-to-User Mapping Approval", responsible:"Dept. Heads", deadline:"Day 7", note:"Assign each agent to their correct territory code" },
     { activity:"Work Order Automation Logic Review", responsible:"Process Owner + IT", deadline:"Day 7–8", note:"Confirm CRM Snag → FSM WO trigger rules and field mappings" },
     { activity:"Status Lifecycle Approval", responsible:"Process Owner", deadline:"Day 8", note:"Sign off CRM ↔ FSM status mapping table" },
@@ -100,8 +100,8 @@ const processOwnerRoadmap = [
     { activity:"Data Migration Sign-off (Assets + Accounts)", responsible:"Process Owner", deadline:"Day 10", note:"Approve final cleaned dataset before IT push to FSM" },
   ]},
   { week:"Week 3", days:"Days 11–17", color:"#e8922a", light:"#fdf3e7", tasks:[
-    { activity:"Pilot UAT — EOM & CST Teams", responsible:"EOM Supervisor + CST Supervisor", deadline:"Day 11–13", note:"Run test work orders end-to-end on staging environment" },
-    { activity:"Pilot UAT — FFT & PT Teams", responsible:"FFT Supervisor + PT Manager", deadline:"Day 13–15", note:"Validate job sheets, sign-off flow, territory access" },
+    { activity:"Pilot UAT — EOM & CS Teams", responsible:"EOM Supervisor + CST Supervisor", deadline:"Day 11–13", note:"Run test work orders end-to-end on staging environment" },
+    { activity:"Pilot UAT — FFT & Project Teams", responsible:"FFT Supervisor + PT Manager", deadline:"Day 13–15", note:"Validate job sheets, sign-off flow, territory access" },
     { activity:"Dispatcher Training (Gantt + Map Console)", responsible:"Dispatchers, facilitated by IT", deadline:"Day 14", note:"Hands-on dispatch console, assignment workflow" },
     { activity:"Technician Mobile App Training", responsible:"All Field Technicians", deadline:"Day 15–16", note:"Travel, arrival, job sheet, parts, signature flow" },
     { activity:"UAT Defect Log & Remediation", responsible:"Process Owner + IT", deadline:"Day 16–17", note:"Capture feedback; classify critical vs minor; prioritize fixes" },
@@ -110,39 +110,38 @@ const processOwnerRoadmap = [
   { week:"Week 4", days:"Days 18–28", color:"#15803d", light:"#f0fdf4", tasks:[
     { activity:"Go-Live — Pilot Territory (DXB-CS)", responsible:"CST Team + Dispatcher", deadline:"Day 18", note:"First live territory; monitor all WO activity closely" },
     { activity:"Go-Live — EOM & GDT Territories", responsible:"EOM + GDT Teams", deadline:"Day 19–20", note:"Hypercare support; daily check-in calls with Process Owner" },
-    { activity:"Go-Live — FFT & PT Territories", responsible:"FFT + PT Teams", deadline:"Day 21–22", note:"Full rollout across all territories" },
-    { activity:"Legacy System Parallel Run", responsible:"Process Owner", deadline:"Day 18–25", note:"Run old & new systems in parallel; validate data parity" },
-    { activity:"KPI Dashboard Review", responsible:"Process Owner + Management", deadline:"Day 25", note:"First live reporting: WO completion rate, SLA adherence" },
+    { activity:"Go-Live — FF & Project Team Territories", responsible:"FFT + PT Teams", deadline:"Day 21–22", note:"Full rollout across all territories" },
+    // { activity:"KPI Dashboard Review", responsible:"Process Owner + Management", deadline:"Day 25", note:"First live reporting: WO completion rate, SLA adherence" },
     { activity:"Hypercare Review & Sign-off", responsible:"Process Owner", deadline:"Day 28", note:"Close project; document lessons learned; confirm steady state" },
   ]},
 ];
 
 const itRoadmap = [
   { week:"Week 1", days:"Days 1–5", color:"#2563eb", light:"#eff6ff", tasks:[
-    { activity:"FSM Organization & Module Configuration", responsible:"Zoho FSM Admin / IT", deadline:"Day 1–2", note:"Set up org, time zones, currencies, modules" },
-    { activity:"Territory Creation & Hierarchy Setup", responsible:"IT / FSM Admin", deadline:"Day 2–3", note:"Create all PREFIX-LOCATION territories; set parent/child hierarchy" },
-    { activity:"Role & Profile Configuration in FSM", responsible:"IT / FSM Admin", deadline:"Day 3", note:"Create roles: Technician, Dispatcher, Supervisor, Back Office, Manager" },
-    { activity:"CRM Integration Setup (API Auth)", responsible:"IT Developer", deadline:"Day 3–4", note:"Configure Zoho CRM ↔ FSM API connection; test auth tokens" },
-    { activity:"Asset Data Import from CRM (cleaned data)", responsible:"IT / Data Analyst", deadline:"Day 4–5", note:"Import cleaned asset data from CRM into Zoho FSM — depends on Process Owner data sign-off by Day 4" },
+    { activity:"FSM Organization & Module Configuration", responsible:"IT", deadline:"Day 1–2", note:"Set up org, time zones, currencies, modules" },
+    { activity:"Territory Creation & Hierarchy Setup", responsible:"IT", deadline:"Day 2–3", note:"Create all PREFIX-LOCATION territories; set parent/child hierarchy" },
+    { activity:"Role & Profile Configuration in FSM", responsible:"IT", deadline:"Day 3", note:"Create roles: Technician, Dispatcher, Supervisor, Back Office, Manager" },
+    { activity:"CRM Integration Setup (API Auth)", responsible:"IT", deadline:"Day 3–4", note:"Configure Zoho CRM ↔ FSM API connection; test auth tokens" },
+    { activity:"Asset Data Import from CRM (cleaned data)", responsible:"IT", deadline:"Day 4–5", note:"Import cleaned asset data from CRM into Zoho FSM — depends on Process Owner data sign-off by Day 4" },
   ]},
   { week:"Week 2", days:"Days 6–10", color:"#0e9e8e", light:"#d0f5f1", tasks:[
-    { activity:"CRM → FSM Asset Sync (One-Way API)", responsible:"IT Developer", deadline:"Day 6–7", note:"Build and test Accounts + Assets sync via Zoho Flow / custom API" },
-    { activity:"Automation: Snag → FSM Work Order", responsible:"IT Developer", deadline:"Day 7–8", note:"Webhook trigger on Snag Status = Complete; field mapping implementation" },
-    { activity:"Status Webhook (FSM → CRM real-time)", responsible:"IT Developer", deadline:"Day 8–9", note:"FSM WO status change pushes update back to CRM Snag record" },
-    { activity:"User Account Creation & Territory Assignment", responsible:"IT / HR", deadline:"Day 9–10", note:"Create all user accounts; assign territory codes and roles" },
+    { activity:"CRM → FSM Asset Sync (One-Way API)", responsible:"IT", deadline:"Day 6–7", note:"Build and test Accounts + Assets sync via Zoho Flow / custom API" },
+    { activity:"Automation: Snag → FSM Work Order", responsible:"IT", deadline:"Day 7–8", note:"Webhook trigger on Snag Commercial Enquiry Status = Complete; field mapping implementation" },
+    { activity:"Status Webhook (FSM → CRM real-time)", responsible:"IT", deadline:"Day 8–9", note:"FSM WO status change pushes update back to CRM Snag record" },
+    { activity:"User Account Creation & Territory Assignment", responsible:"IT + Dept. Heads", deadline:"Day 9–10", note:"Create all user accounts; assign territory codes and roles" },
   ]},
   { week:"Week 3", days:"Days 11–17", color:"#e8922a", light:"#fdf3e7", tasks:[
-    { activity:"Integration End-to-End Testing", responsible:"IT Developer + QA", deadline:"Day 11–13", note:"Full CRM → FSM → CRM round-trip validation with test data" },
-    { activity:"Territory Permission Testing", responsible:"IT / QA", deadline:"Day 13–15", note:"Validate that technicians cannot access cross-territory data" },
-    { activity:"UAT Bug Fixes & Patches", responsible:"IT Developer", deadline:"Day 15–17", note:"Prioritize critical blockers first; document all changes" },
+    { activity:"Integration End-to-End Testing", responsible:"IT", deadline:"Day 11–13", note:"Full CRM → FSM → CRM round-trip validation with test data" },
+    { activity:"Territory Permission Testing", responsible:"IT + Dept. Heads", deadline:"Day 13–15", note:"Validate that technicians cannot access cross-territory data" },
+    { activity:"UAT Bug Fixes & Patches", responsible:"IT", deadline:"Day 15–17", note:"Prioritize critical blockers first; document all changes" },
   ]},
   { week:"Week 4", days:"Days 18–28", color:"#15803d", light:"#f0fdf4", tasks:[
-    { activity:"Production Environment Go-Live Preparation", responsible:"IT", deadline:"Day 17–18", note:"Final production config check; backups; rollback plan ready" },
-    { activity:"Production Data Migration (Final Push)", responsible:"IT / Data Analyst", deadline:"Day 18", note:"Push final cleansed asset & account data to live environment" },
+    { activity:"Production Environment Go-Live Preparation", responsible:"IT + Dept. Heads", deadline:"Day 17–18", note:"Final production config check; backups; rollback plan ready" },
+    { activity:"Production Data Migration (Final Push)", responsible:"IT", deadline:"Day 18", note:"Push final cleansed asset & account data to live environment" },
     { activity:"Monitoring & Alerting Setup", responsible:"IT", deadline:"Day 18–19", note:"Set up sync failure alerts, API error logging, webhook monitors" },
-    { activity:"Territory Strict Permission Enforcement", responsible:"IT / FSM Admin", deadline:"Day 20–22", note:"ETA 4–5 weeks from Go-Live per Zoho roadmap — test when available" },
-    { activity:"Performance & Load Testing", responsible:"IT / QA", deadline:"Day 22–24", note:"Simulate concurrent users; validate system response times" },
-    { activity:"Hypercare Technical Support", responsible:"IT", deadline:"Day 18–28", note:"On-call support for all live territories; daily sync with Process Owner" },
+    { activity:"Territory Strict Permission Enforcement", responsible:"IT", deadline:"Day 20–22", note:"ETA 4–5 weeks from Go-Live per Zoho roadmap — test when available" },
+    // { activity:"Performance & Load Testing", responsible:"IT / QA", deadline:"Day 22–24", note:"Simulate concurrent users; validate system response times" },
+    { activity:"Technical Support", responsible:"IT", deadline:"Day 18–28", note:"On-call support for all live territories; daily sync with Process Owner" },
   ]},
 ];
 
@@ -325,7 +324,7 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
             <div style={{ background:C.navy, borderRadius:10, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>🗄</div>
             <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>ZOHO CRM</div><div style={{ fontSize:11, color:C.slate, textTransform:"uppercase", letterSpacing:1 }}>Master System</div></div>
           </div>
-          {["Accounts (Customers)","Contacts","Snag Module (Issues)","Service Assets","Contracts / SLAs"].map(item => (
+          {["Accounts (Customers)","Contacts","Systems (Assets)","Snag Module"].map(item => (
             <div key={item} style={{ display:"flex", gap:10, alignItems:"center", padding:"8px 0", borderBottom:`1px solid ${C.border}` }}><Dot color={C.slate} /><span style={{ fontSize:13, color:"#334155" }}>{item}</span></div>
           ))}
         </Card>
@@ -349,7 +348,7 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
             <div style={{ background:C.teal, borderRadius:10, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>🔧</div>
             <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>ZOHO FSM</div><div style={{ fontSize:11, color:C.slate, textTransform:"uppercase", letterSpacing:1 }}>Execution System</div></div>
           </div>
-          {["Work Orders","Service Appointments","Job Sheets","Territory Dispatch","Mobile App Access"].map(item => (
+          {["Accounts (Customers)","Contacts","Systems (Assets)","Work Order Request"].map(item => (
             <div key={item} style={{ display:"flex", gap:10, alignItems:"center", padding:"8px 0", borderBottom:`1px solid ${C.border}` }}><Dot color={C.teal} /><span style={{ fontSize:13, color:"#334155" }}>{item}</span></div>
           ))}
         </Card>
@@ -360,10 +359,10 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
         <div><span style={{ fontWeight:800, fontSize:13, color:C.navy }}>Architecture Principle: </span><span style={{ fontSize:13, color:"#7c3d12", lineHeight:1.7 }}>CRM acts as the "Single Source of Truth" for all customer and asset data. FSM is strictly for operational execution, consuming data from CRM and returning job completion status via API.</span></div>
       </div>
 
-      <SectionHeader eyebrow="Data Governance" title="Asset Strategy Flow" subtitle="Controlled data propagation from Master CRM to Field Execution" />
+      <SectionHeader eyebrow="Data Governance" title="Asset Strategy Flow" subtitle="Controlled data propagation from CRM to FSM" />
       <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:14, marginBottom:28 }}>
-        {[{n:1,t:"CRM Main Asset",c:"#2563eb",l:"#eff6ff",rows:[["Master Record","Created & managed by Back Office"],["Details","Purchase Date, Warranty, Location, Contract"],["Ownership","Full Read/Write access"]]},
-          {n:2,t:"FSM Service Asset",c:C.teal,l:C.tealLight,rows:[["Operational Replica","Synced automatically via API"],["Enhancement","QR Codes generated for tagging"],["Access","Read-Only for basic details"]]},
+        {[{n:1,t:"CRM Main Asset (System)",c:"#2563eb",l:"#eff6ff",rows:[["Master Record","Created & managed by CRM"],["Details","System Name, System Type, System Status, System Owner (Account Lookup),SERGAS System Code, State / City, Country, Latitude / Longitude"],["Ownership","Full Read / Write managed in CRM"]]},
+          {n:2,t:"FSM Service Asset",c:C.teal,l:C.tealLight,rows:[["Synced From CRM","System Name, System Type, System Status, System Owner (Account Lookup),SERGAS System Code, State / City, Country, Latitude / Longitude"],["Purpose","Operational execution entity for field service"],["Access","Read-Only for basic details"]]},
           {n:3,t:"Child Assets",c:"#15803d",l:"#f0fdf4",rows:[["Components","Sub-parts linked to Parent Asset"],["Granularity","Allows specific maintenance tracking"],["Mapping","Inherits territory from Parent"]]},
           {n:4,t:"Execution Activities",c:C.amber,l:C.amberLight,rows:[["Work Orders","Linked to specific Asset ID"],["History","Full service audit trail builds up"],["Evidence","Photos/Readings tagged to Asset"]]}].map((s,i) => (
           <div key={s.n} style={{ background:C.white, borderRadius:14, border:`1.5px solid ${s.c}25`, overflow:"hidden" }}>
@@ -397,7 +396,7 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
           <div>
             <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:14 }}>
               <div style={{ background:C.navy, borderRadius:8, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center" }}>🗄</div>
-              <div><div style={{ fontWeight:800, fontSize:14, color:C.navy }}>CRM Snag</div><div style={{ fontSize:11, color:C.slate }}>Office View (Management)</div></div>
+              <div><div style={{ fontWeight:800, fontSize:14, color:C.navy }}>CRM Snag (Snag Operational Status)</div><div style={{ fontSize:11, color:C.slate }}>Office View (Management)</div></div>
             </div>
             {[{s:"Open",c:"#64748b",bg:"#f1f5f9"},{s:"Scheduled",c:"#2563eb",bg:"#eff6ff"},{s:"In Progress",c:"#15803d",bg:"#f0fdf4"},{s:"On Hold",c:"#b45309",bg:"#fffbeb"},{s:"Completed",c:"#15803d",bg:"#dcfce7"},{s:"Cancelled",c:"#dc2626",bg:"#fef2f2"}].map(st => (
               <div key={st.s} style={{ background:st.bg, borderRadius:8, padding:"9px 14px", marginBottom:6, fontSize:13, fontWeight:600, color:st.c }}>{st.s}</div>
@@ -417,16 +416,16 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
           <h3 style={{ margin:"12px 0 6px", fontSize:18, fontWeight:900, color:C.navy }}>ZOHO CRM Snag</h3>
           <div style={{ background:C.amberLight, border:`2px dashed ${C.amber}60`, borderRadius:10, padding:"12px 14px", margin:"14px 0" }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.amber, textTransform:"uppercase", letterSpacing:1 }}>Automation Trigger</div>
-            <div style={{ fontSize:15, fontWeight:900, color:"#92400e", marginTop:4 }}>⚡ Status = Complete</div>
+            <div style={{ fontSize:15, fontWeight:900, color:"#92400e", marginTop:4 }}>⚡ Commercial Enquiry Status = Complete</div>
           </div>
-          <p style={{ fontSize:12, color:C.slate, lineHeight:1.65, margin:0 }}>When a snag is validated and marked complete by the back office, the automation fires instantly.</p>
+          <p style={{ fontSize:12, color:C.slate, lineHeight:1.65, margin:0 }}>When a snag is validated and the <b>Commercial Enquiry Status</b> is updated to <i>Complete</i> in <b>CRM</b>, the automation triggers instantly and automatically creates a <b>Work Order Request</b> in <b>FSM</b>.</p>
         </Card>
         <Card style={{ borderTop:`3px solid ${C.navy}` }}>
           <div style={{ textAlign:"center", marginBottom:14 }}>
             <div style={{ background:C.navy, color:"#fff", borderRadius:20, padding:"4px 14px", fontSize:11, fontWeight:700, display:"inline-block" }}>🤖 AUTO-MAPPING LOGIC</div>
             <div style={{ fontSize:10, color:C.slate, marginTop:6, textTransform:"uppercase", letterSpacing:1 }}>Data Field Transformation</div>
           </div>
-          {[["Account Name","Service Account"],["Contact Person","Contact"],["Site Location","Service Address"],["Asset ID","Asset"],["Priority","Work Order Priority"],["Territory Code","Service Territory"],["Target Date","Due Date"]].map(([f,t]) => (
+          {[["Account","Account"],["Contact","Contact"],["Address","Address"],["Email","Email"],["Mobile","Mobile"],["Phone","Phone"]].map(([f,t]) => (
             <div key={f} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:7 }}>
               <div style={{ flex:1, background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:6, padding:"5px 10px", fontSize:12, color:"#334155" }}>{f}</div>
               <div style={{ color:C.amber, fontSize:16, fontWeight:700 }}>→</div>
@@ -436,12 +435,12 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
         </Card>
         <Card style={{ borderTop:`3px solid ${C.teal}` }}>
           <Pill label="OUTPUT RESULT" bg={C.tealLight} color={C.teal} />
-          <h3 style={{ margin:"12px 0 6px", fontSize:18, fontWeight:900, color:C.navy }}>FSM Work Order</h3>
+          <h3 style={{ margin:"12px 0 6px", fontSize:18, fontWeight:900, color:C.navy }}>FSM Work Order Request</h3>
           <div style={{ background:C.tealLight, border:`2px solid ${C.teal}40`, borderRadius:10, padding:"16px", margin:"14px 0", textAlign:"center" }}>
             <div style={{ fontSize:28 }}>📋</div>
             <div style={{ fontWeight:800, fontSize:14, color:C.teal, marginTop:6 }}>New Record Created</div>
           </div>
-          {["Description Populated","Attachments Cloned","Audit Trail Logged"].map(item => (
+          {["Description Populated"].map(item => (
             <div key={item} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:7 }}><span style={{ color:C.teal, fontWeight:700 }}>✓</span><span style={{ fontSize:12, color:"#334155" }}>{item}</span></div>
           ))}
           <div style={{ background:C.amberLight, borderRadius:8, padding:"8px 12px", marginTop:12 }}>
@@ -593,7 +592,7 @@ function TeamsSection({ isMobile }: ResponsiveProps) {
       </div>
 
       <SectionHeader eyebrow="Project Hierarchy" title="Large Work Order Management" subtitle="Hierarchical breakdown for complex, multi-phase project execution" />
-      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 0fr", gap:20 }}>
         <Card>
           <div style={{ textAlign:"center", marginBottom:16 }}>
             <div style={{ display:"inline-flex", gap:10, alignItems:"center", background:C.navy, borderRadius:10, padding:"10px 18px" }}>
@@ -614,11 +613,11 @@ function TeamsSection({ isMobile }: ResponsiveProps) {
             ))}
           </div>
         </Card>
-        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:10 }}>
+        {/* <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:10 }}>
           {[{ic:"📈",t:"Phase Tracking",d:"Monitor progress per phase (Rough-in vs Finish) independently"},{ic:"💰",t:"Better Reporting",d:"Roll-up costs and hours from child jobs to parent project"},{ic:"👥",t:"Controlled Scheduling",d:"Prevent Phase 2 booking until Phase 1 status is 'Complete'"},{ic:"🛡",t:"SLA Clarity",d:"Define different SLA targets for urgent vs planned phases"}].map(b => (
             <Card key={b.t}><div style={{ fontSize:26, marginBottom:8 }}>{b.ic}</div><div style={{ fontWeight:800, fontSize:13, color:C.navy, marginBottom:6 }}>{b.t}</div><div style={{ fontSize:12, color:C.slate, lineHeight:1.65 }}>{b.d}</div></Card>
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -904,10 +903,10 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
         <Card style={{ borderTop:`3px solid ${C.teal}` }}>
           <div style={{ display:"flex", gap:10, alignItems:"center", marginBottom:16 }}>
             <div style={{ background:"#dcfce7", border:"1px solid #86efac", borderRadius:"50%", width:28, height:28, display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:700, color:"#15803d" }}>✓</div>
-            <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>Available Now</div><div style={{ fontSize:11, color:C.slate }}>Live features ready for immediate deployment</div></div>
+            <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>Available Now & Coming Soon</div><div style={{ fontSize:11, color:C.slate }}>Live features ready for immediate deployment</div></div>
           </div>
           <div style={{ borderBottom:`1px solid ${C.teal}`, marginBottom:14 }} />
-          {[["CRM-FSM Sync","Bi-directional data synchronization for Accounts, Contacts, and Assets"],["Automated Work Orders","Trigger-based creation from CRM Snag status updates"],["Parent / Child Logic","Hierarchical Work Order management for complex projects"],["Multi-Technician","Scheduling multiple resources (Crew) to a single appointment"],["Status Mapping","Real-time status reflection between Field App and Back Office"],["Mobile App Access","Full job execution via FSM mobile app with offline support"]].map(([t,d]) => (
+          {[["CRM-FSM Sync","Bi-directional data synchronization for Accounts, Contacts, and Assets"],["Automated Work Orders","Trigger-based creation from CRM Snag status updates"],["Parent / Child Logic","Hierarchical Work Order management for complex projects"],["Multi-Technician","Scheduling multiple resources (Crew) to a single appointment"],["Status Mapping","Real-time status reflection between FSM and CRM"],["Mobile App Access","Full job execution via FSM mobile app"]].map(([t,d]) => (
             <div key={t} style={{ display:"flex", gap:12, alignItems:"flex-start", background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:10, padding:"11px 14px", marginBottom:8 }}>
               <span style={{ color:C.teal, fontWeight:700, flexShrink:0 }}>✓</span>
               <div><div style={{ fontWeight:700, fontSize:13, color:C.navy }}>{t}</div><div style={{ fontSize:12, color:C.slate, marginTop:2 }}>{d}</div></div>
