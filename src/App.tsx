@@ -6,7 +6,7 @@ const C = {
   border:"#e2e8f0", white:"#ffffff",
   eom:{ bg:"#c2410c", light:"#fff7ed", border:"#c2410c", text:"#7c2d12" },
   fft:{ bg:"#b45309", light:"#fffbeb", border:"#b45309", text:"#78350f" },
-  gdt:{ bg:"#15803d", light:"#f0fdf4", border:"#15803d", text:"#14532d" },
+  got:{ bg:"#15803d", light:"#f0fdf4", border:"#15803d", text:"#14532d" },
   cst:{ bg:"#1d4ed8", light:"#eff6ff", border:"#1d4ed8", text:"#1e3a8a" },
   pt: { bg:"#6d28d9", light:"#f5f3ff", border:"#6d28d9", text:"#3b0764" },
 };
@@ -24,12 +24,12 @@ const teams = [
     services:["Gas Fire Emergency Response","Hot Work Standby","Post-Incident Safety Assessment","Emergency Drill"],
     ppm:["Monthly — Equipment Inspection","Monthly — BA Set Test","Quarterly — Emergency Drill","Annual — Civil Defense Exercise"],
     jobSheet:"FFT Emergency Response Checklist" },
-  { id:"gdt", name:"Gas Distribution Team", abbr:"GDT", territory:"Distribution Zone", color:C.gdt,
-    agents:["Distribution Technician","Pipeline Patrol Officer","Meter Technician","GDT Supervisor"],
+  { id:"got", name:"Gas Operations Team", abbr:"GOT", territory:"Distribution Zone", color:C.got,
+    agents:["Distribution Technician","Pipeline Patrol Officer","Meter Technician","GOT Supervisor"],
     woTypes:["Pipeline Patrol Inspection","Valve Inspection & Test","Meter Reading","Leak Survey"],
-    services:["GDT - Pipeline Route Patrol","GDT - Valve Inspection","GDT - Industrial Meter Reading","GDT - Leak Survey"],
+    services:["GOT - Pipeline Route Patrol","GOT - Valve Inspection","GOT - Industrial Meter Reading","GOT - Leak Survey"],
     ppm:["Quarterly — Pipeline Patrol","Semi-Annual — Valve Exercise","Annual — Network Audit"],
-    jobSheet:"GDT Pipeline Inspection Checklist" },
+    jobSheet:"GOT Pipeline Inspection Checklist" },
   { id:"cst", name:"Customer Service Team", abbr:"CST", territory:"Customer Service Zone", color:C.cst,
     agents:["Customer Service Engineer","Customer Liaison Officer","CST Supervisor"],
     woTypes:["New Gas Connection","Gas Disconnection","Meter Complaint","Gas Smell Investigation","Reconnection"],
@@ -45,8 +45,8 @@ const teams = [
 ];
 
 const flowSteps = [
-  { id:1, icon:"📥", label:"Service Request / PPM Trigger", desc:"Manual request, customer call, or PPM auto-generates WO", who:"Dispatcher / System",
-    actions:["Customer calls → CST raises Service Request","PPM schedule auto-generates WO (14 days in advance)","EOM/FFT raise Emergency WO manually","GDT patrol triggers WO from inspection finding"],
+  { id:1, icon:"📥", label:"Work Order Request / PPM Trigger", desc:"Manual request, customer call, or PPM auto-generates WO", who:"Dispatcher / System",
+    actions:["Customer calls → CST raises Work Order Request","PPM schedule auto-generates WO (14 days in advance)","EOM/FFT raise Emergency WO manually","GOT patrol triggers WO from inspection finding"],
     result:"Work Order created with: Asset, Service, Priority, Territory" },
   { id:2, icon:"📋", label:"Work Order Created", desc:"WO raised with Asset, Service, Territory, Priority", who:"Dispatcher / System",
     actions:["WO Number auto-generated","Asset linked (Parent + Child)","Service selected from catalogue","Priority set: Critical / High / Medium / Normal","Territory assigned → routes to correct team"],
@@ -75,73 +75,66 @@ const flowSteps = [
 ];
 
 const assetHierarchy = [
-  { parent:"City Gate Station (CGS-001)", children:["PRV Unit A","PRV Unit B","Gas Compressor #1","ECV #1","Gas Detector Panel"], team:"eom" },
-  { parent:"District Regulating Station (DRS-001)", children:["Filter Separator","Pressure Regulator Primary","Safety Relief Valve","SCADA Unit"], team:"eom" },
-  { parent:"Pipeline Network — North Zone", children:["Section NZ-001","Section NZ-002","Block Valve BV-001","CP Test Point CP-001"], team:"gdt" },
-  { parent:"Customer Connection — Commercial", children:["Service Riser","Meter Assembly","Emergency Control Valve"], team:"cst" },
+  { parent:"Americana (B123)", children:["PRV Unit A","PRV Unit B","Gas Compressor #1","ECV #1","Gas Detector Panel"], team:"eom" },
+  { parent:"Abu Dhabi Mall (B101)", children:["Filter Separator","Pressure Regulator Primary","Safety Relief Valve"], team:"eom" },
+  { parent:"Pipeline Network — North Zone", children:["Section NZ-001","Section NZ-002","Block Valve BV-001","CP Test Point CP-001"], team:"got" },
+  { parent:"Customer Connection / Disconnection", children:["Gas Meter Connection","Gas Meter Dis-Connection","Gas Meter Inspection"], team:"cst" },
 ];
 
 // ─── ROADMAP DATA ─────────────────────────────────────
 const processOwnerRoadmap = [
-  { week:"Week 1", days:"Days 1–5", color:"#2563eb", light:"#eff6ff", tasks:[
+  { week:"Week 1", days:"Days 1–7", color:"#2563eb", light:"#eff6ff", tasks:[
     { activity:"Kick-off Workshop with All Dept. Heads", responsible:"Process Owner + Dept. Heads (EOM, CS, FF, PRJ)", deadline:"Day 1", note:"Set expectations, confirm scope & department leads" },
     { activity:"Define & Agree Territory Structure", responsible:"Dept. Heads + IT", deadline:"Day 2", note:"Confirm PREFIX-LOCATION naming; approve territory list" },
     { activity:"Review & Validate Service Catalogue per Dept.", responsible:"Each Department Head", deadline:"Day 3", note:"Confirm services, WO types, priority levels per team" },
     { activity:"Collect & Cleanse Asset Master Data from CRM", responsible:"Process Owner + IT", deadline:"Day 3–4", note:"Export assets; validate fields, remove duplicates" },
-    { activity:"Approve Job Sheet Templates (4 types)", responsible:"Dept. Heads", deadline:"Day 5", note:"PPM Checklist, Normal Service, FF Inspection, Project Completion" },
+    { activity:"Approve Job Sheet Templates", responsible:"Dept. Heads", deadline:"Day 5", note:"PPM Checklist, Normal Service, FF Inspection, Project Completion" },
     { activity:"Define PPM Schedules per Asset Type", responsible:"Dept. Heads", deadline:"Day 5", note:"Confirm frequency: monthly, quarterly, semi-annual, annual" },
   ]},
-  { week:"Week 2", days:"Days 6–10", color:"#0e9e8e", light:"#d0f5f1", tasks:[
-    { activity:"User Role Matrix Sign-off", responsible:"Dept. Heads + IT", deadline:"Day 6", note:"Define roles: Technician, Dispatcher, Supervisor, Back Office" },
-    { activity:"Territory-to-User Mapping Approval", responsible:"Dept. Heads", deadline:"Day 7", note:"Assign each agent to their correct territory code" },
-    { activity:"Work Order Automation Logic Review", responsible:"Process Owner + IT", deadline:"Day 7–8", note:"Confirm CRM Snag → FSM WO trigger rules and field mappings" },
+  { week:"Week 2", days:"Days 8–14", color:"#0e9e8e", light:"#d0f5f1", tasks:[
+    { activity:"User Role Matrix Sign-off", responsible:"Dept. Heads + IT", deadline:"Day 8", note:"Define roles: Technician, Dispatcher, Supervisor, Back Office" },
+    { activity:"Territory-to-User Mapping Approval", responsible:"Dept. Heads", deadline:"Day 8", note:"Assign each agent to their correct territory code" },
+    { activity:"Work Order Automation Logic Review", responsible:"Process Owner + IT", deadline:"Day 8–9", note:"Confirm CRM Snag → FSM WO trigger rules and field mappings" },
     { activity:"Status Lifecycle Approval", responsible:"Process Owner", deadline:"Day 8", note:"Sign off CRM ↔ FSM status mapping table" },
     { activity:"UAT Scenario Design", responsible:"Process Owner + Dept. Heads", deadline:"Day 9–10", note:"Define 10–15 real-world test cases per department" },
     { activity:"Data Migration Sign-off (Assets + Accounts)", responsible:"Process Owner", deadline:"Day 10", note:"Approve final cleaned dataset before IT push to FSM" },
   ]},
-  { week:"Week 3", days:"Days 11–17", color:"#e8922a", light:"#fdf3e7", tasks:[
-    { activity:"Pilot UAT — EOM & CS Teams", responsible:"EOM Supervisor + CST Supervisor", deadline:"Day 11–13", note:"Run test work orders end-to-end on staging environment" },
-    { activity:"Pilot UAT — FFT & Project Teams", responsible:"FFT Supervisor + PT Manager", deadline:"Day 13–15", note:"Validate job sheets, sign-off flow, territory access" },
-    { activity:"Dispatcher Training (Gantt + Map Console)", responsible:"Dispatchers, facilitated by IT", deadline:"Day 14", note:"Hands-on dispatch console, assignment workflow" },
-    { activity:"Technician Mobile App Training", responsible:"All Field Technicians", deadline:"Day 15–16", note:"Travel, arrival, job sheet, parts, signature flow" },
+  { week:"Week 3", days:"Days 15–21", color:"#e8922a", light:"#fdf3e7", tasks:[
+    { activity:"Pilot UAT For All Territories", responsible:"All Departments", deadline:"Day 15–17", note:"Run test work orders end-to-end on staging environment" },
+    { activity:"Technician Mobile App Training", responsible:"Each department coordinator is required to conduct training", deadline:"Day 15–16", note:"job sheet, parts, signature flow" },
     { activity:"UAT Defect Log & Remediation", responsible:"Process Owner + IT", deadline:"Day 16–17", note:"Capture feedback; classify critical vs minor; prioritize fixes" },
     { activity:"Management Demo & Go-Live Approval", responsible:"Senior Management + Process Owner", deadline:"Day 17", note:"Present UAT results; obtain formal go-live authorization" },
-  ]},
-  { week:"Week 4", days:"Days 18–28", color:"#15803d", light:"#f0fdf4", tasks:[
-    { activity:"Go-Live — Pilot Territory (DXB-CS)", responsible:"CST Team + Dispatcher", deadline:"Day 18", note:"First live territory; monitor all WO activity closely" },
-    { activity:"Go-Live — EOM & GDT Territories", responsible:"EOM + GDT Teams", deadline:"Day 19–20", note:"Hypercare support; daily check-in calls with Process Owner" },
-    { activity:"Go-Live — FF & Project Team Territories", responsible:"FFT + PT Teams", deadline:"Day 21–22", note:"Full rollout across all territories" },
-    // { activity:"KPI Dashboard Review", responsible:"Process Owner + Management", deadline:"Day 25", note:"First live reporting: WO completion rate, SLA adherence" },
-    { activity:"Hypercare Review & Sign-off", responsible:"Process Owner", deadline:"Day 28", note:"Close project; document lessons learned; confirm steady state" },
+    { activity:"Go-Live", responsible:"CST Team + Dispatcher", deadline:"Day 18", note:"First live territory; monitor all WO activity closely; daily check-in calls with Process Owner; Full rollout across all territories" },
+    
+    // { activity:"KPI Dashboard Review", responsible:"Process Owner + Management", deadline:"Day 21", note:"First live reporting: WO completion rate, SLA adherence" },
+    { activity:"Sign-off", responsible:"Process Owner", deadline:"Day 21", note:"Close project; document lessons learned; confirm steady state" },
   ]},
 ];
 
 const itRoadmap = [
-  { week:"Week 1", days:"Days 1–5", color:"#2563eb", light:"#eff6ff", tasks:[
+  { week:"Week 1", days:"Days 1–7", color:"#2563eb", light:"#eff6ff", tasks:[
     { activity:"FSM Organization & Module Configuration", responsible:"IT", deadline:"Day 1–2", note:"Set up org, time zones, currencies, modules" },
     { activity:"Territory Creation & Hierarchy Setup", responsible:"IT", deadline:"Day 2–3", note:"Create all PREFIX-LOCATION territories; set parent/child hierarchy" },
     { activity:"Role & Profile Configuration in FSM", responsible:"IT", deadline:"Day 3", note:"Create roles: Technician, Dispatcher, Supervisor, Back Office, Manager" },
     { activity:"CRM Integration Setup (API Auth)", responsible:"IT", deadline:"Day 3–4", note:"Configure Zoho CRM ↔ FSM API connection; test auth tokens" },
     { activity:"Asset Data Import from CRM (cleaned data)", responsible:"IT", deadline:"Day 4–5", note:"Import cleaned asset data from CRM into Zoho FSM — depends on Process Owner data sign-off by Day 4" },
   ]},
-  { week:"Week 2", days:"Days 6–10", color:"#0e9e8e", light:"#d0f5f1", tasks:[
-    { activity:"CRM → FSM Asset Sync (One-Way API)", responsible:"IT", deadline:"Day 6–7", note:"Build and test Accounts + Assets sync via Zoho Flow / custom API" },
-    { activity:"Automation: Snag → FSM Work Order", responsible:"IT", deadline:"Day 7–8", note:"Webhook trigger on Snag Commercial Enquiry Status = Complete; field mapping implementation" },
+  { week:"Week 2", days:"Days 8–14", color:"#0e9e8e", light:"#d0f5f1", tasks:[
+    { activity:"CRM → FSM Asset Sync (One-Way API)", responsible:"IT", deadline:"Day 8–9", note:"Build and test Accounts + Assets sync via Zoho Flow / custom API" },
+    { activity:"Automation: Snag → FSM Work Order", responsible:"IT", deadline:"Day 8–9", note:"Webhook trigger on Snag Commercial Enquiry Status = Complete; field mapping implementation" },
     { activity:"Status Webhook (FSM → CRM real-time)", responsible:"IT", deadline:"Day 8–9", note:"FSM WO status change pushes update back to CRM Snag record" },
     { activity:"User Account Creation & Territory Assignment", responsible:"IT + Dept. Heads", deadline:"Day 9–10", note:"Create all user accounts; assign territory codes and roles" },
   ]},
-  { week:"Week 3", days:"Days 11–17", color:"#e8922a", light:"#fdf3e7", tasks:[
-    { activity:"Integration End-to-End Testing", responsible:"IT", deadline:"Day 11–13", note:"Full CRM → FSM → CRM round-trip validation with test data" },
-    { activity:"Territory Permission Testing", responsible:"IT + Dept. Heads", deadline:"Day 13–15", note:"Validate that technicians cannot access cross-territory data" },
+  { week:"Week 3", days:"Days 15–21", color:"#e8922a", light:"#fdf3e7", tasks:[
+    { activity:"Integration End-to-End Testing", responsible:"IT", deadline:"Day 15–17", note:"Full CRM → FSM → CRM round-trip validation with test data" },
+    { activity:"Territory Permission Testing", responsible:"IT + Dept. Heads", deadline:"Day 15–17", note:"Validate that technicians cannot access cross-territory data" },
     { activity:"UAT Bug Fixes & Patches", responsible:"IT", deadline:"Day 15–17", note:"Prioritize critical blockers first; document all changes" },
-  ]},
-  { week:"Week 4", days:"Days 18–28", color:"#15803d", light:"#f0fdf4", tasks:[
     { activity:"Production Environment Go-Live Preparation", responsible:"IT + Dept. Heads", deadline:"Day 17–18", note:"Final production config check; backups; rollback plan ready" },
     { activity:"Production Data Migration (Final Push)", responsible:"IT", deadline:"Day 18", note:"Push final cleansed asset & account data to live environment" },
     { activity:"Monitoring & Alerting Setup", responsible:"IT", deadline:"Day 18–19", note:"Set up sync failure alerts, API error logging, webhook monitors" },
-    { activity:"Territory Strict Permission Enforcement", responsible:"IT", deadline:"Day 20–22", note:"ETA 4–5 weeks from Go-Live per Zoho roadmap — test when available" },
-    // { activity:"Performance & Load Testing", responsible:"IT / QA", deadline:"Day 22–24", note:"Simulate concurrent users; validate system response times" },
-    { activity:"Technical Support", responsible:"IT", deadline:"Day 18–28", note:"On-call support for all live territories; daily sync with Process Owner" },
+    { activity:"Territory Strict Permission Enforcement", responsible:"IT", deadline:"Day 19–21", note:"ETA 4–5 weeks from Go-Live per Zoho roadmap — test when available" },
+    // { activity:"Performance & Load Testing", responsible:"IT / QA", deadline:"Day 19–21", note:"Simulate concurrent users; validate system response times" },
+    { activity:"Technical Support", responsible:"IT", deadline:"Day 18–21", note:"On-call support for all live territories. Following go-live, transition to IT support portal." },
   ]},
 ];
 
@@ -163,7 +156,7 @@ const outOfScopeItems = [
   {
     category: "PPM Schedule Configuration",
     icon: "🔄",
-    owner: "Process Owner / EOM & GDT Department Heads",
+    owner: "Process Owner / EOM & GOT Department Heads",
     description: "Define and document PPM frequencies, asset types covered, and maintenance intervals. IT will configure the schedule in FSM only after the Process Owner provides a finalized and approved PPM matrix.",
     templates: [
       "Monthly — PRV & ECV Test schedule",
@@ -284,11 +277,14 @@ function StrategySection({ isMobile }: ResponsiveProps) {
           </div>
           <div style={{ background:C.navy, borderRadius:12, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>🌐</div>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:10 }}>
-          {[{l:"EOM",d:"Emergency Operations & Maintenance",c:C.eom},{l:"Projects",d:"Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft}].map(x => (
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(auto-fit,minmax(180px,1fr))", gap:10 }}>
+          {[{l:"EOM",d:"Emergency Operations & Maintenance",c:C.eom},{l:"Projects",d:"Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft},{l:"GOT",d:" ",d2:"Gas Operation Team",c:{light:"#ecfeff",bg:"#0f766e",text:"#134e4a"}}].map(x => (
             <div key={x.l} style={{ background:x.c.light, borderTop:`3px solid ${x.c.bg}`, borderRadius:10, padding:"12px 14px" }}>
               <div style={{ fontWeight:800, fontSize:14, color:x.c.bg, marginBottom:4 }}>{x.l}</div>
-              <div style={{ fontSize:11, color:x.c.text }}>{x.d}</div>
+              <div style={{ fontSize:11, color:x.c.text, lineHeight:1.45 }}>
+                <div>{x.d}</div>
+                {"d2" in x && x.d2 && <div>{x.d2}</div>}
+              </div>
             </div>
           ))}
         </div>
@@ -461,9 +457,9 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
       <Card style={{ marginBottom:24, textAlign:"center" }}>
         <div style={{ fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1.5, marginBottom:20 }}>Naming Convention Formula</div>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:isMobile ? 8 : 16, flexWrap:"wrap" }}>
-          {[["Department Prefix","PREFIX","border"],["Geographic Code","LOCATION","border"],["Unique Territory Name","PREFIX-LOCATION","filled"]].map(([label,val,style],i) => (
+          {[["DEPARTMENT PREFIX (PREFIX)","PREFIX","border"],["COUNTRY PREFIX (COUNTRY)","COUNTRY","border"],["GEOGRAPHIC CODE (LOCATION)","LOCATION","border"],["UNIQUE TERRITORY NAME","PREFIX-COUNTRY-LOCATION","filled"]].map(([label,val,style],i) => (
             <div key={val} style={{ display:"flex", alignItems:"center", gap:16 }}>
-              {i>0 && <div style={{ fontSize:28, color:C.slate, fontWeight:300 }}>{i===2?"=":"+"}</div>}
+              {i>0 && <div style={{ fontSize:28, color:C.slate, fontWeight:300 }}>{i===3?"=":"+"}</div>}
               <div style={{ textAlign:"center" }}>
                 <div style={{ fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>{label}</div>
                 <div style={style==="filled" ? { background:C.navy, borderRadius:10, padding:"14px 28px", fontSize:20, fontWeight:900, color:C.white } : { border:`2px dashed ${C.border}`, borderRadius:10, padding:"14px 24px", fontSize:20, fontWeight:900, color:C.navy }}>{val}</div>
@@ -484,7 +480,18 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
             ))}
           </div>
           <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:16 }}>
-            <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>📍 Location Codes (Level 2)</div>
+            <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>🌍 Country Prefixes (Level 2)</div>
+            <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+              {[["🌍","UAE","United Arab Emirates"],["🌍","OMN","Oman"],["🌍","KSA","Saudi Arabia"]].map(([ic,code,country]) => (
+                <div key={code} style={{ background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:8, padding:"7px 14px", display:"flex", gap:6, alignItems:"center" }}>
+                  <span style={{ fontSize:14 }}>{ic}</span>
+                  <div><div style={{ fontWeight:800, fontSize:13, color:C.navy }}>{code}</div><div style={{ fontSize:10, color:C.slate }}>{country}</div></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:16, marginTop:16 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:10 }}>📍 Location Codes (Level 3)</div>
             <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
               {[["🏙","AUH","Abu Dhabi"],["🏙","DXB","Dubai"],["🏙","SHJ","Sharjah"],["🏙","FUJ","Fujairah"]].map(([ic,code,city]) => (
                 <div key={code} style={{ background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:8, padding:"7px 14px", display:"flex", gap:6, alignItems:"center" }}>
@@ -497,7 +504,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
         </Card>
         <Card>
           <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>Generated Territory Examples</div>
-          {[{code:"EOM-AUH",desc:"Ops Team in Abu Dhabi",tag:"OPERATIONS",c:C.eom},{code:"PRJ-DXB",desc:"Projects Team in Dubai",tag:"Projects",c:C.pt},{code:"CS-AUH",desc:"Support Team in Abu Dhabi",tag:"SERVICE",c:C.cst},{code:"FF-SHJ",desc:"Fire Fighting Team in Sharjah",tag:"FIRE FIGHTING",c:C.fft}].map(t => (
+          {[{code:"EOM-UAE-AUH",desc:"Ops Team in Abu Dhabi, United Arab Emirates",tag:"OPERATIONS",c:C.eom},{code:"PRJ-UAE-DXB",desc:"Projects Team in Dubai, United Arab Emirates",tag:"Projects",c:C.pt},{code:"CS-UAE-AUH",desc:"Support Team in Abu Dhabi, United Arab Emirates",tag:"SERVICE",c:C.cst},{code:"FF-UAE-SHJ",desc:"Fire Fighting Team in Sharjah, United Arab Emirates",tag:"FIRE FIGHTING",c:C.fft}].map(t => (
             <div key={t.code} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", marginBottom:8 }}>
               <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>{t.code}</div><div style={{ fontSize:11, color:C.slate, marginTop:2 }}>{t.desc}</div></div>
               <Pill label={t.tag} bg={t.c.light} color={t.c.bg} />
@@ -513,7 +520,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
       <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:14, marginBottom:20 }}>
         {[{n:1,ic:"👤",t:"System User",c:C.navy,d:"Technician or Back Office staff logs into the FSM portal or mobile app."},
           {n:2,ic:"🪪",t:"Assigned Role",c:"#2563eb",d:"Profile determines functional capabilities (e.g., 'View Only' vs 'Edit')."},
-          {n:3,ic:"🗺",t:"Territory Scope",c:C.teal,d:"User is linked to specific location codes (e.g., EOM-AUH).",badge:"ROADMAP: ETA 4–5 Weeks"},
+          {n:3,ic:"🗺",t:"Territory Scope",c:C.teal,d:"User is linked to specific location codes (e.g., EOM-UAE-AUH).",badge:"ROADMAP: ETA 4–5 Weeks"},
           {n:4,ic:"🗄",t:"Data Access",c:C.navy,d:"System filters records based on territory match.",items:["✓ Work Orders","✓ Service Assets","🔒 Other Territories (blocked)"]}].map(s => (
           <div key={s.n} style={{ background:C.white, borderRadius:14, border:`1px solid ${C.border}`, overflow:"hidden" }}>
             {s.badge && <div style={{ background:C.amberLight, padding:"6px 12px", fontSize:10, fontWeight:700, color:C.amber }}>⚑ {s.badge}</div>}
@@ -652,7 +659,7 @@ function AssetsSection({ isMobile }: ResponsiveProps) {
       </div>
       <SectionHeader eyebrow="Configuration" title="Asset Custom Fields" subtitle="Additional fields configured for gas operations data capture" />
       <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,1fr)", gap:10 }}>
-        {[{f:"Asset Code",t:"Text",e:"SERGAS-CGS-001-PRV-A"},{f:"Gas Asset Type",t:"Picklist",e:"PRV / Compressor / Valve…"},{f:"Operating Pressure (bar)",t:"Decimal",e:"10.5"},{f:"Pipeline Material",t:"Picklist",e:"PE / Steel / Cast Iron"},{f:"Last Inspection Date",t:"Date",e:"22/02/2026"},{f:"Next Inspection Due",t:"Date",e:"22/05/2026"},{f:"Risk Level",t:"Picklist",e:"Low / Medium / High / Critical"},{f:"Condition Rating",t:"Picklist",e:"Good / Fair / Poor"},{f:"SCADA Tag",t:"Text",e:"CGS-001-PRV-A-TAG"}].map(x => (
+        {[{f:"Asset Code",t:"Text",e:"SERGAS-CGS-001-PRV-A"},{f:"Asset type",t:"Picklist",e:"Regulator Station Asset"},{f:"Parent System / Asset",t:"Lookup",e:"Americana (DRS-001)"},{f:"Service And Part",t:"Lookup",e:"PRV Inspection + Diaphragm Kit"},{f:"Last Inspection Date",t:"Date",e:"22/02/2026"},{f:"Risk Level",t:"Picklist",e:"Low / Medium / High / Critical"},{f:"Condition Rating",t:"Picklist",e:"Good / Fair / Poor"},{f:"Assigned Engineer",t:"Picklist",e:"Ahmed Al Mansoori"},{f:"Ordered Date",t:"Date",e:"15/01/2026"},{f:"Installation Date",t:"Date",e:"02/02/2026"},{f:"Purchased Date",t:"Date",e:"10/01/2026"},{f:"Warranty Expiration",t:"Date",e:"10/01/2028"},{f:"Region",t:"Picklist",e:"UAE North Zone"}].map(x => (
           <Card key={x.f}>
             <div style={{ fontWeight:700, fontSize:13, color:C.navy, marginBottom:8 }}>{x.f}</div>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}><Pill label={x.t} bg="#dbeafe" color="#1e40af" /><span style={{ fontSize:11, color:C.slate, fontStyle:"italic" }}>{x.e}</span></div>
@@ -669,7 +676,7 @@ function ServiceFlowSection({ isMobile }: ResponsiveProps) {
   const sc = ["#c2410c","#b45309","#d97706","#65a30d","#15803d","#0891b2","#2563eb","#6d28d9","#0f172a"];
   return (
     <div>
-      <SectionHeader eyebrow="Operational Logic" title="End-to-End Service Flow" subtitle="From service request to PDF report — complete field execution chain" />
+      <SectionHeader eyebrow="Operational Logic" title="End-to-End Service Flow" subtitle="From Work Order request to PDF report — complete field execution chain" />
       <Card style={{ marginBottom:24 }}>
         <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>Service Appointment Logic — Execution Chain</div>
         <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:12, marginBottom:16 }}>
@@ -766,9 +773,9 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
     <div>
       {/* Hero */}
       <div style={{ background:`linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, borderRadius:18, padding:isMobile ? "24px 18px" : "36px 40px", marginBottom:28 }}>
-        <Pill label="STRATEGIC EXECUTION — 4 WEEK PLAN" bg="rgba(14,158,142,0.18)" color={C.teal} style={{ marginBottom:12 }} />
+        <Pill label="STRATEGIC EXECUTION — 3 WEEK PLAN" bg="rgba(14,158,142,0.18)" color={C.teal} style={{ marginBottom:12 }} />
         <h2 style={{ margin:"0 0 8px", fontSize:28, fontWeight:900, color:C.white, fontFamily:"Georgia,serif" }}>Implementation Roadmap</h2>
-        <p style={{ margin:"0 0 24px", fontSize:14, color:"rgba(255,255,255,0.6)", lineHeight:1.6 }}>Compressed 4-week delivery plan — dual-track execution. Select a scope to view its detailed activity schedule.</p>
+        <p style={{ margin:"0 0 24px", fontSize:14, color:"rgba(255,255,255,0.6)", lineHeight:1.6 }}>Compressed 3-week delivery plan — dual-track execution. Select a scope to view its detailed activity schedule.</p>
         <div style={{ display:"flex", gap:12, flexDirection:isMobile ? "column" : "row" }}>
           {[{id:"process",label:"👔 Process Owner Scope",sub:"Business decisions, UAT, approvals & training"},
             {id:"it",label:"💻 IT Scope",sub:"Configuration, integration & testing"}].map(s => (
@@ -781,7 +788,7 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
       </div>
 
       {/* Week selector */}
-      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(4,1fr)", gap:12, marginBottom:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,1fr)", gap:12, marginBottom:20 }}>
         {data.map(w => (
           <div key={w.week} onClick={() => setExpandedWeek(expandedWeek===w.week?null:w.week)} style={{ borderRadius:12, padding:"14px 16px", cursor:"pointer", transition:"all 0.2s", background:expandedWeek===w.week?w.color:w.light, border:`2px solid ${expandedWeek===w.week?w.color:w.color+"40"}`, boxShadow:expandedWeek===w.week?`0 6px 20px ${w.color}40`:"none" }}>
             <div style={{ fontWeight:900, fontSize:18, color:expandedWeek===w.week?"#fff":w.color, marginBottom:3 }}>{w.week}</div>
@@ -906,7 +913,7 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
             <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>Available Now & Coming Soon</div><div style={{ fontSize:11, color:C.slate }}>Live features ready for immediate deployment</div></div>
           </div>
           <div style={{ borderBottom:`1px solid ${C.teal}`, marginBottom:14 }} />
-          {[["CRM-FSM Sync","Bi-directional data synchronization for Accounts, Contacts, and Assets"],["Automated Work Orders","Trigger-based creation from CRM Snag status updates"],["Parent / Child Logic","Hierarchical Work Order management for complex projects"],["Multi-Technician","Scheduling multiple resources (Crew) to a single appointment"],["Status Mapping","Real-time status reflection between FSM and CRM"],["Mobile App Access","Full job execution via FSM mobile app"]].map(([t,d]) => (
+          {[["CRM-FSM Sync","Bi-directional data synchronization for Accounts, Contacts, and Assets"],["Automated Work Order Request","Trigger-based creation from CRM Snag status updates"],["Parent / Child Logic","Hierarchical Work Order management for complex projects"],["Multi-Technician","Scheduling multiple resources (Crew) to a single appointment"],["Status Mapping","Real-time status reflection between FSM and CRM"],["Mobile App Access","Full job execution via FSM mobile app with offline support"]].map(([t,d]) => (
             <div key={t} style={{ display:"flex", gap:12, alignItems:"flex-start", background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:10, padding:"11px 14px", marginBottom:8 }}>
               <span style={{ color:C.teal, fontWeight:700, flexShrink:0 }}>✓</span>
               <div><div style={{ fontWeight:700, fontSize:13, color:C.navy }}>{t}</div><div style={{ fontSize:12, color:C.slate, marginTop:2 }}>{d}</div></div>
