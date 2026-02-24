@@ -9,6 +9,7 @@ const C = {
   got:{ bg:"#15803d", light:"#f0fdf4", border:"#15803d", text:"#14532d" },
   cst:{ bg:"#1d4ed8", light:"#eff6ff", border:"#1d4ed8", text:"#1e3a8a" },
   pt: { bg:"#6d28d9", light:"#f5f3ff", border:"#6d28d9", text:"#3b0764" },
+  ig: { bg:"#0f766e", light:"#ecfeff", border:"#0f766e", text:"#134e4a" },
 };
 
 const teams = [
@@ -42,6 +43,12 @@ const teams = [
     services:["PT - New Installation","PT - Network Upgrade","PT - Commissioning","PT - 6-Month Post-Commission Check"],
     ppm:["6-Month Post-Commissioning Check","Annual — Project Asset Handover"],
     jobSheet:"PT Project Work Checklist" },
+  { id:"ig", name:"Industrial Gas", abbr:"IG", territory:"Industrial Gas Zone", color:C.ig,
+    agents:["Industrial Gas Technician","Pressure Systems Engineer","Gas Plant Operator","IG Supervisor"],
+    woTypes:["Industrial Gas Inspection","Bulk Gas Supply Maintenance","Industrial Meter Calibration","Industrial Gas Emergency Response"],
+    services:["IG - Industrial Gas Safety Inspection","IG - Bulk Gas Supply Service","IG - Industrial Meter Calibration","IG - Pipeline Pressure Validation"],
+    ppm:["Monthly — Industrial Meter Calibration","Quarterly — Bulk Gas Supply Inspection","Annual — Industrial Gas Safety Audit"],
+    jobSheet:"IG Industrial Gas Checklist" },
 ];
 
 const flowSteps = [
@@ -169,6 +176,189 @@ const outOfScopeItems = [
   },
 ];
 
+const LIMITATIONS_DATA = [
+  {
+    section: "Work Order Management",
+    items: [
+      { name: "Requests", limit: null, included: true },
+      { name: "Estimates", limit: null, included: true },
+      { name: "Standard Estimates", limit: null, included: true },
+      { name: "Optional Line Items", limit: null, included: true },
+      { name: "Work Orders", limit: null, included: true },
+      { name: "Service Line Items", limit: "30/work order", included: false },
+      { name: "Part Line Items", limit: "30/work order", included: false },
+      { name: "Service Task Line Items", limit: "100/service line item", included: false },
+      { name: "Service Appointments", limit: null, included: true },
+      { name: "Time Slot", limit: null, included: true },
+      { name: "Queue Based (All Day)", limit: null, included: true },
+      { name: "Multi Day", limit: null, included: true },
+      { name: "Service Task", limit: "100/service", included: false },
+      { name: "Service Report", limit: "10/appoinment", included: false },
+      { name: "Record Templates", limit: "40/module", included: false },
+      { name: "Gantt View", limit: null, included: true },
+      { name: "Grid View", limit: null, included: true },
+      { name: "Map View", limit: null, included: true },
+      { name: "Calendar View", limit: "Day, Week, Month view", included: false },
+      { name: "Trips", limit: "500/appointment", included: false },
+      { name: "Time Sheet", limit: "15/user/day", included: false },
+      { name: "Multi currency", limit: "20/organization", included: false },
+      { name: "Notes and Attachments", limit: null, included: true },
+      { name: "Unified Notes View", limit: null, included: true },
+      { name: "Multi-day appointments", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Maintenance Plans",
+    items: [
+      { name: "Scheduled Maintenance", limit: "200 active | Total 500", included: false },
+    ],
+  },
+  {
+    section: "Contact Management",
+    items: [
+      { name: "Customers", limit: null, included: true },
+      { name: "Companies", limit: null, included: true },
+      { name: "Customer History", limit: null, included: true },
+      { name: "Notes", limit: null, included: true },
+      { name: "Notifications", limit: null, included: true },
+      { name: "Custom Notifications", limit: null, included: true },
+      { name: "Timeline", limit: null, included: true },
+      { name: "Advanced Filters", limit: null, included: true },
+      { name: "Contact Merge", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Workforce Management",
+    items: [
+      { name: "Users", limit: "200", included: false },
+      { name: "Equipments", limit: null, included: true },
+      { name: "Crew", limit: "50/organization", included: false },
+      { name: "Skills", limit: "50/organization", included: false },
+      { name: "Service Territories", limit: "50/organization", included: false },
+      { name: "Attendance", limit: null, included: true },
+      { name: "Availability", limit: null, included: true },
+      { name: "Business Hours", limit: null, included: true },
+      { name: "Holiday", limit: null, included: true },
+      { name: "Time Off", limit: null, included: true },
+      { name: "Field Agent Live Location Tracking", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Service Management",
+    items: [
+      { name: "Services And Parts", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Asset Management",
+    items: [
+      { name: "Manage Assets", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Billing (Powered by Zoho Invoice)",
+    items: [
+      { name: "2-way sync between FSM and Zoho Invoice/Books", limit: null, included: true },
+      { name: "Invoices", limit: null, included: true },
+      { name: "Payments", limit: null, included: true },
+      { name: "Payment Gateway Integration", limit: null, included: true },
+      { name: "Taxes (Specific to local currencies and tax laws)", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Product Customization",
+    items: [
+      { name: "Module Custom Fields", limit: "Max 10/module", included: false },
+      { name: "Text & Choice fields", limit: "30/module", included: false },
+      { name: "Decimal & Currency fields", limit: "14/module", included: false },
+      { name: "Date Time & Long Integer fields", limit: "20/module", included: false },
+      { name: "Checkbox", limit: "10/module", included: false },
+      { name: "Number", limit: "10/module", included: false },
+      { name: "Date", limit: "10/module", included: false },
+      { name: "Job Sheets", limit: "10 Active | Total 20", included: false },
+      { name: "Job Sheets Custom Fields", limit: "Max 200/job sheet", included: false },
+      { name: "Text & Choice fields (Job Sheets)", limit: "72/job sheet", included: false },
+      { name: "Decimal & Currency fields (Job Sheets)", limit: "28/job sheet", included: false },
+      { name: "Date Time & Long Integer fields (Job Sheets)", limit: "20/job sheet", included: false },
+      { name: "Checkbox (Job Sheets)", limit: "20/job sheet", included: false },
+      { name: "Number & Rating fields (Job Sheets)", limit: "20/job sheet", included: false },
+      { name: "Date (Job Sheets)", limit: "20/job sheet", included: false },
+      { name: "Image Upload", limit: "20/job sheet", included: false },
+      { name: "FSM List View", limit: null, included: true },
+      { name: "Custom Views", limit: "110/module", included: false },
+      { name: "PDF Templates", limit: "100/module", included: false },
+    ],
+  },
+  {
+    section: "Automation",
+    items: [
+      { name: "Workflow Rules", limit: "5 active/module | Total 40/module", included: false },
+      { name: "Time-based Workflow Rules", limit: "5 active/module | Total 40/module", included: false },
+      { name: "Custom Functions", limit: "5/module", included: false },
+      { name: "Standalone Functions", limit: "3/organization", included: false },
+      { name: "Field Updates", limit: "5/module", included: false },
+      { name: "Email Template", limit: "11/module", included: false },
+      { name: "Email Notification", limit: "5/module", included: false },
+      { name: "Webhooks", limit: "11/module", included: false },
+    ],
+  },
+  {
+    section: "Reports",
+    items: [
+      { name: "Standard Reports", limit: null, included: true },
+      { name: "Custom Reports", limit: "20/module | Total 50", included: false },
+      { name: "Dashboard", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Data Management",
+    items: [
+      { name: "Mass Update", limit: null, included: true },
+    ],
+  },
+  {
+    section: "File Storage",
+    items: [
+      { name: "File Storage", limit: "10 GB/organization + 50(100) appointments", included: false },
+      { name: "Additional File Storage", limit: "AED 54.75/month for 25 GB", included: false },
+    ],
+  },
+  {
+    section: "Data Store",
+    items: [
+      { name: "Data Store", limit: "500,000 records", included: false },
+      { name: "Import Data", limit: "20,000 records/batch", included: false },
+      { name: "Export Data", limit: null, included: true },
+      { name: "Import History", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Security and Privacy",
+    items: [
+      { name: "Custom Profiles", limit: "15/organization", included: false },
+      { name: "Data Encryption (EAR)", limit: null, included: true },
+      { name: "Audit Trail", limit: null, included: true },
+      { name: "GDPR Compliance", limit: null, included: true },
+    ],
+  },
+  {
+    section: "Developer Tools",
+    items: [
+      { name: "APIs (Daily call limit)", limit: "25000/Day/Org", included: false },
+      { name: "API's Window Limit", limit: "5000/User/Min", included: false },
+      { name: "API Concurrency Limit", limit: "15(Client)/Org", included: false },
+      { name: "Connections", limit: "1", included: false },
+      { name: "Webhooks", limit: "10 Active/module | Total 100/module", included: false },
+    ],
+  },
+  {
+    section: "Mobile Support",
+    items: [
+      { name: "Mobile App for Field Techs", limit: null, included: true },
+    ],
+  },
+] as const;
+
 
 // ─── SHARED COMPONENTS ────────────────────────────────
 type SectionHeaderProps = {
@@ -277,8 +467,8 @@ function StrategySection({ isMobile }: ResponsiveProps) {
           </div>
           <div style={{ background:C.navy, borderRadius:12, width:48, height:48, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24, flexShrink:0 }}>🌐</div>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(auto-fit,minmax(180px,1fr))", gap:10 }}>
-          {[{l:"EOM",d:"Emergency Operations & Maintenance",c:C.eom},{l:"Projects",d:"Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft},{l:"GOT",d:" ",d2:"Gas Operation Team",c:{light:"#ecfeff",bg:"#0f766e",text:"#134e4a"}}].map(x => (
+        <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,minmax(0,1fr))", gap:10 }}>
+          {[{l:"EOM",d:"Emergency Operations & Maintenance",c:C.eom},{l:"Projects",d:"Projects & Installations",c:C.pt},{l:"Customer Service",d:"Client Requests & Support",c:C.cst},{l:"Fire Fighting",d:"Specialized Safety Inspections",c:C.fft},{l:"GOT",d:" ",d2:"Gas Operation Team",c:C.got},{l:"Industrial Gas",d:"Industrial Gas Operations",c:C.ig}].map(x => (
             <div key={x.l} style={{ background:x.c.light, borderTop:`3px solid ${x.c.bg}`, borderRadius:10, padding:"12px 14px" }}>
               <div style={{ fontWeight:800, fontSize:14, color:x.c.bg, marginBottom:4 }}>{x.l}</div>
               <div style={{ fontSize:11, color:x.c.text, lineHeight:1.45 }}>
@@ -472,7 +662,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
         <Card>
           <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>👥 Department Prefixes (Level 1)</div>
           <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:10, marginBottom:20 }}>
-            {[{ab:"EOM",f:"Emergency Ops & Maintenance",c:C.eom},{ab:"PRJ",f:"Projects",c:C.pt},{ab:"CS",f:"Customer Service",c:C.cst},{ab:"FF",f:"Fire Fighting",c:C.fft}].map(d => (
+            {[{ab:"EOM",f:"Emergency Ops & Maintenance",c:C.eom},{ab:"PRJ",f:"Projects",c:C.pt},{ab:"CS",f:"Customer Service",c:C.cst},{ab:"FF",f:"Fire Fighting",c:C.fft},{ab:"IG",f:"Industrial Gas",c:C.ig}].map(d => (
               <div key={d.ab} style={{ borderLeft:`3px solid ${d.c.bg}`, paddingLeft:12, paddingTop:4, paddingBottom:4 }}>
                 <div style={{ fontWeight:900, fontSize:18, color:d.c.bg }}>{d.ab}</div>
                 <div style={{ fontSize:11, color:C.slate, marginTop:2 }}>{d.f}</div>
@@ -504,7 +694,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
         </Card>
         <Card>
           <div style={{ fontSize:11, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:1, marginBottom:16 }}>Generated Territory Examples</div>
-          {[{code:"EOM-UAE-AUH",desc:"Ops Team in Abu Dhabi, United Arab Emirates",tag:"OPERATIONS",c:C.eom},{code:"PRJ-UAE-DXB",desc:"Projects Team in Dubai, United Arab Emirates",tag:"Projects",c:C.pt},{code:"CS-UAE-AUH",desc:"Support Team in Abu Dhabi, United Arab Emirates",tag:"SERVICE",c:C.cst},{code:"FF-UAE-SHJ",desc:"Fire Fighting Team in Sharjah, United Arab Emirates",tag:"FIRE FIGHTING",c:C.fft}].map(t => (
+          {[{code:"EOM-UAE-AUH",desc:"Ops Team in Abu Dhabi, United Arab Emirates",tag:"OPERATIONS",c:C.eom},{code:"PRJ-UAE-DXB",desc:"Projects Team in Dubai, United Arab Emirates",tag:"Projects",c:C.pt},{code:"CS-UAE-AUH",desc:"Support Team in Abu Dhabi, United Arab Emirates",tag:"SERVICE",c:C.cst},{code:"FF-UAE-SHJ",desc:"Fire Fighting Team in Sharjah, United Arab Emirates",tag:"FIRE FIGHTING",c:C.fft},{code:"IG-UAE-AUH",desc:"Industrial Gas Team in Abu Dhabi, United Arab Emirates",tag:"INDUSTRIAL GAS",c:C.ig}].map(t => (
             <div key={t.code} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:"#f8fafc", border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 14px", marginBottom:8 }}>
               <div><div style={{ fontWeight:900, fontSize:16, color:C.navy }}>{t.code}</div><div style={{ fontSize:11, color:C.slate, marginTop:2 }}>{t.desc}</div></div>
               <Pill label={t.tag} bg={t.c.light} color={t.c.bg} />
@@ -547,8 +737,8 @@ function TeamsSection({ isMobile }: ResponsiveProps) {
   const team = teams.find(t => t.id === active);
   return (
     <div>
-      <SectionHeader eyebrow="Field Operations" title="Teams & Territories" subtitle="Five specialized teams operating within the unified FSM ecosystem" />
-      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr 1fr" : "repeat(5,1fr)", gap:10, marginBottom:24 }}>
+      <SectionHeader eyebrow="Field Operations" title="Teams & Territories" subtitle="Six specialized teams operating within the unified FSM ecosystem" />
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr 1fr" : "repeat(6,1fr)", gap:10, marginBottom:24 }}>
         {teams.map(t => (
           <div key={t.id} onClick={() => setActive(t.id)} style={{ background:active===t.id?t.color.bg:C.white, border:`2px solid ${t.color.border}`, borderRadius:14, padding:16, cursor:"pointer", transition:"all 0.2s", boxShadow:active===t.id?`0 6px 20px ${t.color.bg}40`:"0 2px 6px rgba(0,0,0,0.04)" }}>
             <Pill label={t.abbr} bg={active===t.id?"rgba(255,255,255,0.2)":t.color.bg} color="#fff" style={{ marginBottom:10 }} />
@@ -764,10 +954,102 @@ function ServiceFlowSection({ isMobile }: ResponsiveProps) {
 
 // ─── ROADMAP ──────────────────────────────────────────
 function RoadmapSection({ isMobile }: ResponsiveProps) {
+  const roadmapScheduleConfig = {
+    overallTimeline: "24 February 2026 – 16 March 2026",
+    overallStart: new Date(2026, 1, 24),
+    overallEnd: new Date(2026, 2, 16),
+    weekStarts: [new Date(2026, 1, 24), new Date(2026, 2, 3), new Date(2026, 2, 10)],
+    workingDaysPerWeek: 5,
+    followUpMeetings: {
+      week1: "03/Mar/2026",
+      week2: "10/Mar/2026",
+      week3: "17/Mar/2026",
+    },
+    weekStartLabels: ["24/Feb/2026", "03/Mar/2026", "10/Mar/2026"],
+  } as const;
+
+  const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
+  const toDateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  const addBusinessDays = (date: Date, daysToAdd: number) => {
+    const next = new Date(date);
+    let added = 0;
+    while (added < daysToAdd) {
+      next.setDate(next.getDate() + 1);
+      if (!isWeekend(next)) {
+        added += 1;
+      }
+    }
+    return next;
+  };
+  const getCalendarDateFromWeekDay = (weekNumber: number, dayIndex: number) => {
+    if (weekNumber < 1 || weekNumber > roadmapScheduleConfig.weekStarts.length) {
+      return null;
+    }
+    if (dayIndex < 1 || dayIndex > roadmapScheduleConfig.workingDaysPerWeek) {
+      return null;
+    }
+    return addBusinessDays(roadmapScheduleConfig.weekStarts[weekNumber - 1], dayIndex - 1);
+  };
+  const getWeekDayFromCalendarDate = (date: Date) => {
+    const dateKey = toDateKey(date);
+    for (let weekNumber = 1; weekNumber <= roadmapScheduleConfig.weekStarts.length; weekNumber += 1) {
+      for (let dayIndex = 1; dayIndex <= roadmapScheduleConfig.workingDaysPerWeek; dayIndex += 1) {
+        const mappedDate = getCalendarDateFromWeekDay(weekNumber, dayIndex);
+        if (mappedDate && toDateKey(mappedDate) === dateKey) {
+          return { weekNumber, dayIndex };
+        }
+      }
+    }
+    return null;
+  };
+  const getLegacyCalendarDateFromAbsoluteDay = (absoluteDay: number) => {
+    const legacy = new Date(roadmapScheduleConfig.overallStart);
+    legacy.setDate(legacy.getDate() + absoluteDay - 1);
+    return legacy;
+  };
+  const normalizeDeadlineLabel = (deadline: string, weekNumber: number) => {
+    const match = deadline.match(/Day\s*(\d+)(?:\s*[–-]\s*(\d+))?/);
+    if (!match) {
+      return deadline;
+    }
+
+    const convertDay = (day: number) => {
+      if (day >= 1 && day <= roadmapScheduleConfig.workingDaysPerWeek) {
+        return day;
+      }
+
+      const mapped = getWeekDayFromCalendarDate(getLegacyCalendarDateFromAbsoluteDay(day));
+      if (mapped && mapped.weekNumber === weekNumber) {
+        return mapped.dayIndex;
+      }
+
+      const weekBase = (weekNumber - 1) * 7 + 1;
+      return Math.max(1, Math.min(roadmapScheduleConfig.workingDaysPerWeek, day - weekBase + 1));
+    };
+
+    const dayStart = convertDay(Number(match[1]));
+    const dayEnd = match[2] ? convertDay(Number(match[2])) : null;
+    if (!dayEnd || dayEnd === dayStart) {
+      return `Day ${dayStart}`;
+    }
+    const sorted = [dayStart, dayEnd].sort((a, b) => a - b);
+    return `Day ${sorted[0]}–${sorted[1]}`;
+  };
+
   const [scope, setScope] = useState<"process" | "it">("process");
   const [expandedWeek, setExpandedWeek] = useState<string | null>("Week 1");
   const [expandedOos, setExpandedOos] = useState<number | null>(null);
-  const data = scope === "process" ? processOwnerRoadmap : itRoadmap;
+  const rawData = scope === "process" ? processOwnerRoadmap : itRoadmap;
+  const data = rawData.map((week, weekIndex) => ({
+    ...week,
+    days: `Days 1–${roadmapScheduleConfig.workingDaysPerWeek}`,
+    startDate: roadmapScheduleConfig.weekStartLabels[weekIndex],
+    followUpMeeting: roadmapScheduleConfig.followUpMeetings[`week${weekIndex + 1}` as "week1" | "week2" | "week3"],
+    tasks: week.tasks.map(task => ({
+      ...task,
+      deadline: normalizeDeadlineLabel(task.deadline, weekIndex + 1),
+    })),
+  }));
 
   return (
     <div>
@@ -776,6 +1058,10 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
         <Pill label="STRATEGIC EXECUTION — 3 WEEK PLAN" bg="rgba(14,158,142,0.18)" color={C.teal} style={{ marginBottom:12 }} />
         <h2 style={{ margin:"0 0 8px", fontSize:28, fontWeight:900, color:C.white, fontFamily:"Georgia,serif" }}>Implementation Roadmap</h2>
         <p style={{ margin:"0 0 24px", fontSize:14, color:"rgba(255,255,255,0.6)", lineHeight:1.6 }}>Compressed 3-week delivery plan — dual-track execution. Select a scope to view its detailed activity schedule.</p>
+        <div style={{ margin:"-12px 0 24px", fontSize:12, color:"rgba(255,255,255,0.75)", lineHeight:1.7 }}>
+          <div><strong>Overall timeline:</strong> {roadmapScheduleConfig.overallTimeline}</div>
+          
+        </div>
         <div style={{ display:"flex", gap:12, flexDirection:isMobile ? "column" : "row" }}>
           {[{id:"process",label:"👔 Process Owner Scope",sub:"Business decisions, UAT, approvals & training"},
             {id:"it",label:"💻 IT Scope",sub:"Configuration, integration & testing"}].map(s => (
@@ -793,6 +1079,11 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
           <div key={w.week} onClick={() => setExpandedWeek(expandedWeek===w.week?null:w.week)} style={{ borderRadius:12, padding:"14px 16px", cursor:"pointer", transition:"all 0.2s", background:expandedWeek===w.week?w.color:w.light, border:`2px solid ${expandedWeek===w.week?w.color:w.color+"40"}`, boxShadow:expandedWeek===w.week?`0 6px 20px ${w.color}40`:"none" }}>
             <div style={{ fontWeight:900, fontSize:18, color:expandedWeek===w.week?"#fff":w.color, marginBottom:3 }}>{w.week}</div>
             <div style={{ fontSize:12, color:expandedWeek===w.week?"rgba(255,255,255,0.75)":C.slate, marginBottom:8 }}>{w.days}</div>
+            <div style={{ fontSize:10, color:expandedWeek===w.week?"rgba(255,255,255,0.65)":C.slate, marginBottom:8 }}>Start: {w.startDate}</div>
+            <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:expandedWeek===w.week?"rgba(255,255,255,0.16)":`${w.color}16`, color:expandedWeek===w.week?"#fff":w.color, borderRadius:999, padding:"3px 8px", fontSize:10, fontWeight:700, marginBottom:8, maxWidth:"100%" }}>
+              <span style={{ flexShrink:0 }}>📅</span>
+              <span style={{ overflowWrap:"anywhere" }}>Follow-up meeting: {w.followUpMeeting}</span>
+            </div>
             <div style={{ display:"flex", alignItems:"center", gap:6 }}>
               <div style={{ background:expandedWeek===w.week?"rgba(255,255,255,0.2)":`${w.color}20`, borderRadius:6, padding:"2px 8px" }}><span style={{ fontSize:12, fontWeight:700, color:expandedWeek===w.week?"#fff":w.color }}>{w.tasks.length} tasks</span></div>
               <span style={{ fontSize:14, color:expandedWeek===w.week?"#fff":C.slate }}>{expandedWeek===w.week?"▲":"▼"}</span>
@@ -942,11 +1233,71 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
 }
 
 // ─── APP ──────────────────────────────────────────────
+function LimitationsSection({ isMobile }: ResponsiveProps) {
+  const [query, setQuery] = useState("");
+  const keyword = query.trim().toLowerCase();
+  const sections = LIMITATIONS_DATA
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => !keyword || item.name.toLowerCase().includes(keyword) || (item.limit || "").toLowerCase().includes(keyword)),
+    }))
+    .filter(section => section.items.length > 0);
+  return (
+    <div>
+      <SectionHeader eyebrow="Reference" title="Limitations" subtitle="Zoho FSM module limits and quotas (per org / per module)" />
+      <Card style={{ marginBottom:16, background:`linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, border:"none" }}>
+        <div style={{ fontSize:12, color:"rgba(255,255,255,0.7)", marginBottom:10 }}>Values are based on the current plan constraints.</div>
+        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search limitations (invoice, webhook, users...)" style={{ width:"100%", borderRadius:10, border:"1px solid rgba(255,255,255,0.22)", background:"rgba(255,255,255,0.08)", color:"#fff", padding:"10px 12px", fontSize:13, outline:"none" }} />
+      </Card>
+      <div style={{ display:"grid", gap:14 }}>
+        {sections.map(section => (
+          <Card key={section.section}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12, gap:10 }}>
+              <div style={{ fontSize:16, fontWeight:900, color:C.navy }}>{section.section}</div>
+              <Pill label={`${section.items.length} items`} bg={C.slateLight} color={C.slate} />
+            </div>
+            {isMobile ? (
+              <div>
+                {section.items.map(item => (
+                  <div key={item.name} style={{ border:`1px solid ${C.border}`, borderRadius:10, background:"#fafbfc", padding:"10px 12px", marginBottom:8 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:C.navy, marginBottom:7 }}>{item.name}</div>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10 }}>
+                      <div style={{ fontSize:12, color:C.slate }}>{item.limit || "—"}</div>
+                      {item.included ? <Pill label="Included" bg="#dcfce7" color="#15803d" /> : <Pill label="Limited" bg={C.slateLight} color={C.slate} />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ border:`1px solid ${C.border}`, borderRadius:10, overflow:"hidden" }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1.7fr 1fr 0.7fr", background:"#f8fafc", borderBottom:`1px solid ${C.border}` }}>
+                  <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8 }}>Feature / Item</div>
+                  <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"right", borderLeft:`1px solid ${C.border}` }}>Limit / Value</div>
+                  <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"center", borderLeft:`1px solid ${C.border}` }}>Availability</div>
+                </div>
+                {section.items.map((item, i) => (
+                  <div key={item.name} style={{ display:"grid", gridTemplateColumns:"1.7fr 1fr 0.7fr", background:i%2===0?C.white:"#fafbfc", borderBottom:i<section.items.length-1?`1px solid ${C.border}`:"none" }}>
+                    <div style={{ padding:"10px 12px", fontSize:12, fontWeight:600, color:C.navy }}>{item.name}</div>
+                    <div style={{ padding:"10px 12px", fontSize:12, color:"#334155", textAlign:"right", borderLeft:`1px solid ${C.border}` }}>{item.limit || "—"}</div>
+                    <div style={{ padding:"10px 12px", textAlign:"center", borderLeft:`1px solid ${C.border}` }}>
+                      {item.included ? <Pill label="Included" bg="#dcfce7" color="#15803d" /> : <Pill label="Limited" bg={C.slateLight} color={C.slate} />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const navTabs = [
   {id:"strategy",label:"Strategy"},{id:"architecture",label:"Architecture"},
   {id:"territories",label:"Territories & Access"},{id:"teams",label:"Teams"},
   {id:"assets",label:"Assets"},{id:"flow",label:"Service Flow"},
-  {id:"roadmap",label:"Implementation Roadmap"},
+  {id:"roadmap",label:"Implementation Roadmap"},{id:"limitations",label:"Limitations"},
 ] as const;
 
 type TabId = (typeof navTabs)[number]["id"];
@@ -990,7 +1341,7 @@ export default function App() {
     };
   }, []);
 
-  const map: Record<TabId, ReactNode> = { strategy:<StrategySection isMobile={isMobile} />, architecture:<ArchitectureSection isMobile={isMobile} />, territories:<TerritoriesSection isMobile={isMobile} />, teams:<TeamsSection isMobile={isMobile} />, assets:<AssetsSection isMobile={isMobile} />, flow:<ServiceFlowSection isMobile={isMobile} />, roadmap:<RoadmapSection isMobile={isMobile} /> };
+  const map: Record<TabId, ReactNode> = { strategy:<StrategySection isMobile={isMobile} />, architecture:<ArchitectureSection isMobile={isMobile} />, territories:<TerritoriesSection isMobile={isMobile} />, teams:<TeamsSection isMobile={isMobile} />, assets:<AssetsSection isMobile={isMobile} />, flow:<ServiceFlowSection isMobile={isMobile} />, roadmap:<RoadmapSection isMobile={isMobile} />, limitations:<LimitationsSection isMobile={isMobile} /> };
   return (
     <div style={{ fontFamily:"'Trebuchet MS','Gill Sans',sans-serif", background:"#eef2f7", minHeight:"100vh", overflowX:"hidden", WebkitTextSizeAdjust:"100%" as any }}>
       <div style={{ background:C.navy, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
@@ -1013,3 +1364,6 @@ export default function App() {
     </div>
   );
 }
+
+
+
