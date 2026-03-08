@@ -640,7 +640,79 @@ function ArchitectureSection({ isMobile }: ResponsiveProps) {
 }
 
 // ─── TERRITORIES ──────────────────────────────────────
+const territoryLocationData = [
+  { id:"uae", country:"United Arab Emirates", countryCode:"UAE", flag:"🇦🇪",
+    subGroups:[
+      { name:"Abu Dhabi", ref:"https://u.ae/en/about-the-uae/the-seven-emirates/abu-dhabi",
+        locations:[
+          { name:"Abu Dhabi Region", code:"AUH" },
+          { name:"Al Ain Region",    code:"AAN" },
+          { name:"Al Dhafra Region", code:"DFR" },
+        ] },
+      { name:"Dubai", ref:"https://en.wikipedia.org/wiki/List_of_communities_in_Dubai",
+        locations:[
+          { name:"Northwest – Sector 1",     code:"NWS" },
+          { name:"North – Sector 2",         code:"NTH" },
+          { name:"West – Sector 3",          code:"WST" },
+          { name:"North Central – Sector 4", code:"NCT" },
+          { name:"Southwest – Sector 5",     code:"SWT" },
+          { name:"Central – Sector 6",       code:"CTR" },
+          { name:"Northeast – Sector 7",     code:"NET" },
+          { name:"East – Sector 8",          code:"EST" },
+          { name:"South – Sector 9",         code:"STH" },
+        ] },
+    ] },
+  { id:"omn", country:"Oman", countryCode:"OMN", flag:"🇴🇲",
+    subGroups:[
+      { name:"Oman", ref:"https://www.fm.gov.om/en/about-oman/state/oman-by-region/",
+        locations:[
+          { name:"Musandam",          code:"MSD" },
+          { name:"Al Buraimi",        code:"BRM" },
+          { name:"Al Batinah North",  code:"BNN" },
+          { name:"Al Batinah South",  code:"BNS" },
+          { name:"Muscat",            code:"MCT" },
+          { name:"A'Dhahirah",        code:"DHR" },
+          { name:"A'Dakhiliyah",      code:"DKH" },
+          { name:"A'Sharqiyah North", code:"SHN" },
+          { name:"A'Sharqiyah South", code:"SHS" },
+          { name:"Al Wusta",          code:"WST" },
+          { name:"Dhofar",            code:"DHF" },
+        ] },
+    ] },
+  { id:"ksa", country:"Saudi Arabia", countryCode:"KSA", flag:"🇸🇦",
+    subGroups:[
+      { name:"Saudi Arabia", ref:"https://www.mofa.gov.sa/en/ksa/Pages/default.aspx",
+        locations:[
+          { name:"Riyadh",                           code:"RYD" },
+          { name:"Makkah",                           code:"MKH" },
+          { name:"Madinah",                          code:"MDN" },
+          { name:"Eastern Province (Ash-Sharqiyah)", code:"ESP" },
+          { name:"Al-Qassim",                        code:"QSM" },
+          { name:"Hail",                             code:"HAL" },
+          { name:"Tabuk",                            code:"TBK" },
+          { name:"Al-Baha",                          code:"BAH" },
+          { name:"Jazan",                            code:"JZN" },
+          { name:"Najran",                           code:"NJR" },
+          { name:"Asir",                             code:"ASR" },
+          { name:"Al-Jouf",                          code:"JOF" },
+          { name:"Northern Borders",                 code:"NBR" },
+        ] },
+    ] },
+];
+
+const deptList = [
+  { id:"EOM", name:"Gas Emergency & Operations", color:C.eom },
+  { id:"FFT", name:"Firefighting Team",          color:C.fft },
+  { id:"GOT", name:"Gas Operations Team",        color:C.got },
+  { id:"CST", name:"Customer Service Team",      color:C.cst },
+  { id:"PT",  name:"Project Team",               color:C.pt  },
+  { id:"IG",  name:"Industrial Gas",             color:C.ig  },
+];
+
 function TerritoriesSection({ isMobile }: ResponsiveProps) {
+  const [activeDept, setActiveDept] = useState("EOM");
+  const dept = deptList.find(d => d.id === activeDept)!;
+  const totalTerritories = territoryLocationData.reduce((sum, c) => sum + c.subGroups.reduce((s2, g) => s2 + g.locations.length, 0), 0);
   return (
     <div>
       <SectionHeader eyebrow="Structured Organization" title="Territory Structure Strategy" subtitle="Standardized naming conventions for logical data separation across departments and regions" />
@@ -726,6 +798,97 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
       <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "1fr 1fr", gap:14 }}>
         <Card style={{ borderLeft:`4px solid #dc2626` }}><div style={{ fontWeight:800, fontSize:14, color:C.navy, marginBottom:6 }}>🛡 Data Isolation</div><p style={{ margin:0, fontSize:13, color:C.slate, lineHeight:1.65 }}>Technicians in Dubai (DXB) cannot view or modify assets in Abu Dhabi (AUH), preventing accidental cross-region errors.</p></Card>
         <Card style={{ borderLeft:`4px solid ${C.teal}` }}><div style={{ fontWeight:800, fontSize:14, color:C.navy, marginBottom:6 }}>🔄 Dynamic Updates</div><p style={{ margin:0, fontSize:13, color:C.slate, lineHeight:1.65 }}>If a technician moves permanently, updating their User Profile Territory immediately grants access to the new region's data.</p></Card>
+      </div>
+
+      <SectionHeader eyebrow="Department Territory Assignments" title="Territory Code Generator" subtitle="Select a department — territories update automatically with standardized PREFIX-COUNTRY-LOCATION codes" />
+
+      {/* Department selector */}
+      <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:20 }}>
+        {deptList.map(d => {
+          const active = activeDept === d.id;
+          return (
+            <button key={d.id} onClick={() => setActiveDept(d.id)} style={{
+              display:"flex", alignItems:"center", gap:8,
+              padding: isMobile ? "9px 14px" : "10px 20px",
+              border:`2px solid ${active ? d.color.bg : C.border}`,
+              borderRadius:10, cursor:"pointer", background: active ? d.color.bg : C.white,
+              color: active ? "#fff" : C.navy,
+              fontWeight:800, fontSize: isMobile ? 12 : 13,
+              boxShadow: active ? `0 4px 14px ${d.color.bg}50` : "none",
+              transition:"all 0.18s",
+            }}>
+              <span style={{ fontFamily:"monospace", letterSpacing:0.5 }}>{d.id}</span>
+              {!isMobile && <span style={{ fontWeight:500, fontSize:11, opacity:0.85 }}>{d.name}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Active department summary banner */}
+      <div style={{ background:dept.color.light, border:`1.5px solid ${dept.color.bg}40`, borderRadius:14, padding:"14px 20px", marginBottom:24, display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:10 }}>
+        <div>
+          <div style={{ fontWeight:900, fontSize:17, color:dept.color.bg }}>{dept.id} — {dept.name}</div>
+          <div style={{ fontSize:12, color:C.slate, marginTop:3 }}>{totalTerritories} territories across {territoryLocationData.length} country groups</div>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:6, background:dept.color.bg, color:"#fff", borderRadius:10, padding:"8px 16px" }}>
+          <span style={{ fontFamily:"monospace", fontWeight:900, fontSize:14, letterSpacing:1 }}>{dept.id}-COUNTRY-LOC</span>
+          <span style={{ fontSize:11, opacity:0.7 }}>format</span>
+        </div>
+      </div>
+
+      {/* Country territory cards */}
+      <div style={{ display:"grid", gridTemplateColumns:isMobile ? "1fr" : "repeat(3,1fr)", gap:16 }}>
+        {territoryLocationData.map(country => {
+          const total = country.subGroups.reduce((s, g) => s + g.locations.length, 0);
+          return (
+            <Card key={country.id} style={{ borderTop:`3px solid ${dept.color.bg}`, padding:0, overflow:"hidden" }}>
+              {/* Card header */}
+              <div style={{ background:`${dept.color.bg}08`, borderBottom:`1px solid ${dept.color.bg}20`, padding:"14px 18px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <span style={{ fontSize:22 }}>{country.flag}</span>
+                  <div>
+                    <div style={{ fontWeight:900, fontSize:15, color:C.navy }}>{country.country}</div>
+                    <div style={{ fontSize:10, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, marginTop:1 }}>{country.countryCode} · {total} territories</div>
+                  </div>
+                </div>
+                <div style={{ background:dept.color.bg, color:"#fff", borderRadius:6, padding:"3px 10px", fontSize:10, fontWeight:800, letterSpacing:0.5 }}>{country.countryCode}</div>
+              </div>
+
+              {/* Sub-groups */}
+              {country.subGroups.map((group, gi) => (
+                <div key={group.name}>
+                  {/* Sub-group label (only shown when >1 sub-group) */}
+                  {country.subGroups.length > 1 && (
+                    <div style={{ background:`${dept.color.bg}06`, borderBottom:`1px solid ${dept.color.bg}15`, padding:"7px 18px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                      <span style={{ fontSize:11, fontWeight:800, color:dept.color.bg, textTransform:"uppercase", letterSpacing:0.8 }}>{group.name}</span>
+                      <span style={{ fontSize:10, color:C.slate }}>{group.locations.length} locations</span>
+                    </div>
+                  )}
+
+                  {/* Territory chips */}
+                  <div style={{ padding:"10px 14px", display:"flex", flexWrap:"wrap", gap:6, borderBottom: gi < country.subGroups.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                    {group.locations.map(loc => (
+                      <div key={loc.code} style={{ background:dept.color.light, border:`1px solid ${dept.color.bg}35`, borderRadius:6, padding:"5px 8px", flexShrink:0 }}>
+                        <div style={{ fontFamily:"monospace", fontWeight:900, fontSize:10, color:dept.color.bg, letterSpacing:0.4, whiteSpace:"nowrap" }}>
+                          {dept.id}-{country.countryCode}-{loc.code}
+                        </div>
+                        <div style={{ fontSize:9, color:C.slate, marginTop:2, lineHeight:1.2, whiteSpace:"nowrap" }}>{loc.name}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Reference link per sub-group */}
+                  <div style={{ padding:"8px 18px", borderBottom: gi < country.subGroups.length - 1 ? `1px solid ${dept.color.bg}15` : "none" }}>
+                    <a href={group.ref} target="_blank" rel="noopener noreferrer" style={{ display:"inline-flex", alignItems:"center", gap:6, fontSize:11, color:dept.color.bg, fontWeight:700, textDecoration:"none" }}>
+                      <span>🔗</span>
+                      <span>For more details, please visit this link</span>
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
