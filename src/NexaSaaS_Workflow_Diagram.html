@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexaSaaS — Platform Workflow Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #171d2e;
+    --border: #1e2740;
+    --accent: #4f8ef7;
+    --accent2: #7c5af7;
+    --green: #3ecf8e;
+    --orange: #f7934f;
+    --red: #f74f6a;
+    --yellow: #f7d44f;
+    --text: #e8eaf2;
+    --muted: #5a6282;
+    --dim: #2a3356;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  header {
+    padding: 40px 60px 30px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+
+  .header-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  .diagram-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 0 60px;
+    margin-top: 40px;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    padding: 0 60px;
+    margin-bottom: 40px;
+    letter-spacing: -1px;
+  }
+
+  /* Tab nav */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 60px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    border-bottom: none;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); background: var(--surface); }
+  .tab.active {
+    color: var(--accent);
+    background: var(--surface);
+    border-color: var(--border);
+    border-bottom-color: var(--surface);
+  }
+
+  .diagram-section { display: none; padding: 0 60px 80px; }
+  .diagram-section.active { display: block; }
+
+  /* ── FLOW DIAGRAM ────────────────────── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    max-width: 1100px;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+
+  .flow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Nodes */
+  .node {
+    position: relative;
+    border-radius: 10px;
+    padding: 14px 20px;
+    min-width: 160px;
+    text-align: center;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: all 0.25s;
+    cursor: default;
+    z-index: 2;
+  }
+
+  .node:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 30px rgba(79,142,247,0.15);
+  }
+
+  .node-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+
+  .node-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .node-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* Node colors */
+  .node-blue { border-color: rgba(79,142,247,0.4); background: rgba(79,142,247,0.08); }
+  .node-blue .node-title { color: #7eb3ff; }
+  .node-green { border-color: rgba(62,207,142,0.4); background: rgba(62,207,142,0.08); }
+  .node-green .node-title { color: #5ed9a8; }
+  .node-purple { border-color: rgba(124,90,247,0.4); background: rgba(124,90,247,0.08); }
+  .node-purple .node-title { color: #a07ef7; }
+  .node-orange { border-color: rgba(247,147,79,0.4); background: rgba(247,147,79,0.08); }
+  .node-orange .node-title { color: #f7b07e; }
+  .node-red { border-color: rgba(247,79,106,0.4); background: rgba(247,79,106,0.08); }
+  .node-red .node-title { color: #f77e94; }
+  .node-yellow { border-color: rgba(247,212,79,0.4); background: rgba(247,212,79,0.08); }
+  .node-yellow .node-title { color: #f7dc7e; }
+
+  /* Arrows */
+  .arrow-down {
+    width: 2px;
+    height: 30px;
+    background: linear-gradient(to bottom, var(--dim), var(--accent));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .arrow-down::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--accent);
+  }
+
+  .arrow-right {
+    height: 2px;
+    width: 40px;
+    background: linear-gradient(to right, var(--dim), var(--accent));
+    position: relative;
+    flex-shrink: 0;
+  }
+  .arrow-right::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: var(--accent);
+  }
+
+  .arrow-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  /* Section headers in diagrams */
+  .section-band {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-band .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ── ARCHITECTURE DIAGRAM ─────────────── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    max-width: 1100px;
+  }
+
+  .arch-layer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .arch-layer-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .arch-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .arch-item:hover { border-color: var(--accent); background: rgba(79,142,247,0.05); }
+
+  .arch-item-icon {
+    font-size: 16px;
+    width: 28px;
+    text-align: center;
+  }
+
+  .arch-item-info { flex: 1; }
+  .arch-item-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .arch-item-desc { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+  .arch-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .badge-free { background: rgba(62,207,142,0.15); color: #3ecf8e; }
+  .badge-paid { background: rgba(247,147,79,0.15); color: #f7934f; }
+  .badge-p2 { background: rgba(124,90,247,0.15); color: #7c5af7; }
+
+  /* ── FULL FLOW SVG AREA ─────────────── */
+  .full-flow {
+    max-width: 1100px;
+    overflow-x: auto;
+  }
+
+  /* ── DATA FLOW TABLE ─────────────────── */
+  .flow-table {
+    width: 100%;
+    max-width: 1100px;
+    border-collapse: collapse;
+  }
+
+  .flow-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .flow-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  .flow-table tr:hover td { background: var(--surface); }
+
+  .flow-table .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .flow-table .trigger {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+  }
+
+  .flow-table .actor {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .actor-customer { background: rgba(79,142,247,0.15); color: #7eb3ff; }
+  .actor-system { background: rgba(62,207,142,0.15); color: #3ecf8e; }
+  .actor-admin { background: rgba(247,147,79,0.15); color: #f7934f; }
+  .actor-paddle { background: rgba(124,90,247,0.15); color: #a07ef7; }
+
+  /* ── PHASE TIMELINE ─────────────────── */
+  .timeline {
+    max-width: 1100px;
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--green));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+    padding-left: 30px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -39px;
+    top: 16px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+  }
+
+  .timeline-week {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .timeline-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-tasks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .task-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* ── MAIN FLOW VISUAL ─────────────────────── */
+  .main-flow-wrap {
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+    max-width: 1100px;
+  }
+
+  .flow-lane {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .lane-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-align: center;
+    padding: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .step-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .step-box:hover { border-color: var(--accent); background: rgba(79,142,247,0.04); }
+
+  .step-box .step-n {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .step-box.highlight-green { border-left: 3px solid var(--green); }
+  .step-box.highlight-blue { border-left: 3px solid var(--accent); }
+  .step-box.highlight-orange { border-left: 3px solid var(--orange); }
+  .step-box.highlight-red { border-left: 3px solid var(--red); }
+  .step-box.highlight-purple { border-left: 3px solid var(--accent2); }
+
+  .connector {
+    text-align: center;
+    color: var(--muted);
+    font-size: 16px;
+    margin: 2px 0;
+    line-height: 1;
+  }
+
+  .email-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(247,212,79,0.1);
+    color: var(--yellow);
+    border: 1px solid rgba(247,212,79,0.2);
+    margin-top: 4px;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Nexa<span>SaaS</span> <span style="color:var(--muted);font-weight:400;font-size:14px">/ nexasaas.com</span></div>
+  <div class="header-meta">
+    Platform Workflow Diagram<br>
+    Version 1.0 — All decisions locked<br>
+    Phase 1 → Phase 3 overview
+  </div>
+</header>
+
+<div class="diagram-title">High-Level Platform Diagram</div>
+<h1>System Workflow Overview</h1>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('customer')">01 — Customer Journey</div>
+  <div class="tab" onclick="showTab('architecture')">02 — Tech Architecture</div>
+  <div class="tab" onclick="showTab('provisioning')">03 — Provisioning Flow</div>
+  <div class="tab" onclick="showTab('billing')">04 — Billing Flow</div>
+  <div class="tab" onclick="showTab('data')">05 — Data Lifecycle</div>
+  <div class="tab" onclick="showTab('phases')">06 — Build Phases</div>
+</div>
+
+<!-- TAB 1: Customer Journey -->
+<div id="tab-customer" class="diagram-section active">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#4f8ef7"></div>Customer Action</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3ecf8e"></div>System Action</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f7934f"></div>Email Trigger</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f7d44f"></div>Decision Point</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f74f6a"></div>Danger / Delete</div>
+  </div>
+
+  <div class="main-flow-wrap">
+    <!-- Lane 1: Discovery & Signup -->
+    <div class="flow-lane">
+      <div class="lane-header">🌐 Discovery & Signup</div>
+      <div class="step-box highlight-blue">
+        <div class="step-n">STEP 01</div>
+        Visit nexasaas.com — browse app catalog
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-blue">
+        <div class="step-n">STEP 02</div>
+        Click "Start Free Trial" → fill signup form<br>
+        <span style="font-size:11px;color:var(--muted)">name, company, email, password</span>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-blue">
+        <div class="step-n">STEP 03</div>
+        Slug collision check<br>
+        <span style="font-size:11px;color:var(--muted)">"acmecorp taken → try acmecorp-uae?"</span>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">
+        <div class="step-n">SYSTEM</div>
+        "Verify your email" screen shown<br>
+        <span style="font-size:11px;color:var(--muted)">Resend button, 60s cooldown</span>
+        <div class="email-badge">📧 verification email sent</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-blue">
+        <div class="step-n">STEP 04</div>
+        Customer clicks email link → verified
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">
+        <div class="step-n">SYSTEM — PROVISIONING</div>
+        MongoDB DB created<br>
+        Subdomain configured<br>
+        Zitadel tenant registered<br>
+        <div class="email-badge">📧 welcome email sent</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-blue">
+        <div class="step-n">STEP 05</div>
+        Setup wizard (3 steps)<br>
+        <span style="font-size:11px;color:var(--muted)">logo, company name, invite team</span>
+      </div>
+    </div>
+
+    <!-- Lane 2: Trial & Conversion -->
+    <div class="flow-lane">
+      <div class="lane-header">⏱ Trial & Conversion</div>
+      <div class="step-box highlight-green">
+        <div class="step-n">TRIAL STARTS</div>
+        14-day full Pro access begins<br>
+        <span style="font-size:11px;color:var(--muted)">No credit card required</span>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-orange">
+        <div class="step-n">DAY 7</div>
+        <div class="email-badge">📧 reminder email</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-orange">
+        <div class="step-n">DAY 12</div>
+        <div class="email-badge">📧 reminder email</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-orange">
+        <div class="step-n">DAY 14 — TRIAL EXPIRES</div>
+        Access locked → upgrade prompt shown
+        <div class="email-badge">📧 trial-expired email</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-blue" style="background:rgba(247,212,79,0.05);border-color:rgba(247,212,79,0.3)">
+        <div class="step-n" style="color:var(--yellow)">DECISION POINT</div>
+        <span style="color:var(--yellow)">Convert or not?</span>
+      </div>
+      <div style="display:flex;gap:10px;margin:8px 0">
+        <div style="flex:1">
+          <div class="step-box highlight-green" style="font-size:11px">
+            <div class="step-n">YES — UPGRADES</div>
+            Paddle checkout → payment → full access restored
+            <div class="email-badge">📧 payment receipt</div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div class="step-box highlight-red" style="font-size:11px">
+            <div class="step-n">NO — CHURNS</div>
+            Account stays locked, data kept 30 days
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lane 3: Active Customer -->
+    <div class="flow-lane">
+      <div class="lane-header">✅ Active Subscription</div>
+      <div class="step-box highlight-green">
+        <div class="step-n">ACTIVE</div>
+        Full access to subscribed plan
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">
+        <div class="step-n">USAGE TRACKING</div>
+        Docs created, users added, storage used<br>
+        <span style="font-size:11px;color:var(--muted)">Checked on every action</span>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-orange">
+        <div class="step-n">AT 80% USAGE</div>
+        Warning bar shown + upgrade prompt
+        <div class="email-badge">📧 80% warning email</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-red">
+        <div class="step-n">AT 100% USAGE</div>
+        Feature blocked<br>
+        <span style="font-size:11px;color:var(--muted)">"Upgrade to continue" modal shown</span>
+        <div class="email-badge">📧 blocked email</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">
+        <div class="step-n">BILLING RENEWAL</div>
+        Paddle auto-charges monthly/yearly<br>
+        <span style="font-size:11px;color:var(--muted)">Usage counter resets</span>
+        <div class="email-badge">📧 payment receipt</div>
+      </div>
+      <div class="connector">↓</div>
+      <div class="step-box" style="border-color:rgba(247,79,106,0.3);background:rgba(247,79,106,0.05)">
+        <div class="step-n" style="color:var(--red)">IF PAYMENT FAILS</div>
+        Paddle retries 3x → grace period<br>
+        <div class="email-badge">📧 payment failed email</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: Architecture -->
+<div id="tab-architecture" class="diagram-section">
+  <div style="margin-bottom:30px;font-size:13px;color:var(--muted);max-width:700px;line-height:1.7">
+    Shared instance + separate database per tenant. One OpenSign deployment serves all customers. Each tenant gets an isolated MongoDB database. Portal runs on MakerKit. All auth goes through Zitadel.
+  </div>
+
+  <div class="arch-grid">
+    <!-- Frontend Layer -->
+    <div class="arch-layer">
+      <div class="arch-layer-title" style="color:#7eb3ff">🌐 Frontend Layer</div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🏠</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">MakerKit Portal</div>
+          <div class="arch-item-desc">Next.js / React / TypeScript<br>nexasaas.com</div>
+        </div>
+        <div class="arch-badge badge-paid">$299</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">✍️</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">OpenSign Web App</div>
+          <div class="arch-item-desc">React / Node.js<br>{tenant}.opensign.nexasaas.com</div>
+        </div>
+        <div class="arch-badge badge-free">Free</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">📱</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">OpenSign Mobile</div>
+          <div class="arch-item-desc">React Native fork</div>
+        </div>
+        <div class="arch-badge badge-p2">Phase 2</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🎫</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Ticketing App</div>
+          <div class="arch-item-desc">ASP.NET Core / Angular</div>
+        </div>
+        <div class="arch-badge badge-p2">Phase 2</div>
+      </div>
+    </div>
+
+    <!-- Backend / Services -->
+    <div class="arch-layer">
+      <div class="arch-layer-title" style="color:#5ed9a8">⚙️ Backend Services</div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🔐</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Zitadel SSO</div>
+          <div class="arch-item-desc">Self-hosted OIDC / SAML<br>auth.nexasaas.com</div>
+        </div>
+        <div class="arch-badge badge-free">Free</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">💳</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Paddle Billing</div>
+          <div class="arch-item-desc">Subscriptions + VAT<br>UAE 5% / Saudi 15%</div>
+        </div>
+        <div class="arch-badge badge-paid">% rev</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">📧</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Resend / SendGrid</div>
+          <div class="arch-item-desc">15 email triggers<br>Transactional only</div>
+        </div>
+        <div class="arch-badge badge-free">~Free</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🔔</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Firebase FCM</div>
+          <div class="arch-item-desc">Push notifications (mobile)</div>
+        </div>
+        <div class="arch-badge badge-p2">Phase 2</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">💬</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Crisp Chat</div>
+          <div class="arch-item-desc">Live support widget</div>
+        </div>
+        <div class="arch-badge badge-free">Free</div>
+      </div>
+    </div>
+
+    <!-- Data Layer -->
+    <div class="arch-layer">
+      <div class="arch-layer-title" style="color:#a07ef7">🗄️ Data Layer</div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🍃</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">MongoDB Atlas</div>
+          <div class="arch-item-desc">One DB per tenant<br>opensign_{tenantId}</div>
+        </div>
+        <div class="arch-badge badge-free">Free tier</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🐘</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">PostgreSQL</div>
+          <div class="arch-item-desc">MakerKit portal DB<br>tenants, plans, billing</div>
+        </div>
+        <div class="arch-badge badge-free">Free tier</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🗃️</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">MSSQL</div>
+          <div class="arch-item-desc">Ticketing app DB</div>
+        </div>
+        <div class="arch-badge badge-p2">Phase 2</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-item-icon">🚂</div>
+        <div class="arch-item-info">
+          <div class="arch-item-name">Railway / Render</div>
+          <div class="arch-item-desc">Hosting all services<br>~$20-50/mo</div>
+        </div>
+        <div class="arch-badge badge-paid">$20-50</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data isolation diagram -->
+  <div style="margin-top:40px">
+    <div class="section-band"><div class="dot" style="background:var(--accent)"></div>Multi-Tenant Data Isolation</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;max-width:1100px;margin-top:16px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;min-width:160px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px">SHARED</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:#7eb3ff">OpenSign Instance</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">1 deployment<br>serves all tenants</div>
+      </div>
+      <div style="display:flex;align-items:center;color:var(--muted);font-size:20px">→</div>
+      <div style="background:var(--surface);border:1px solid rgba(62,207,142,0.3);border-radius:10px;padding:16px;min-width:160px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px">TENANT A</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:#3ecf8e">opensign_acmecorp</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Isolated MongoDB<br>100% separate data</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid rgba(124,90,247,0.3);border-radius:10px;padding:16px;min-width:160px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px">TENANT B</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:#a07ef7">opensign_testco</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Isolated MongoDB<br>100% separate data</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid rgba(247,147,79,0.3);border-radius:10px;padding:16px;min-width:160px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px">TENANT N</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:#f7934f">opensign_{id}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Isolated MongoDB<br>100% separate data</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:6px;max-width:600px">
+      Subdomain → X-Tenant-ID header → DB connection string → ~50 lines of code change in OpenSign
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: Provisioning -->
+<div id="tab-provisioning" class="diagram-section">
+  <div style="margin-bottom:20px;font-size:13px;color:var(--muted)">
+    Triggered automatically when customer verifies their email. Runs in under 5 seconds.
+  </div>
+
+  <div style="max-width:600px">
+    <div class="step-box highlight-blue" style="margin-bottom:0">
+      <div class="step-n">TRIGGER</div>
+      Customer clicks email verification link
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-green" style="margin-bottom:0">
+      <div class="step-n">STEP 1 — SLUG</div>
+      Generate tenant slug from company name<br>
+      <span style="font-size:11px;color:var(--muted)">acmecorp → check availability → confirm or suggest</span>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-green" style="margin-bottom:0">
+      <div class="step-n">STEP 2 — DATABASE</div>
+      Create MongoDB database: opensign_acmecorp<br>
+      <span style="font-size:11px;color:var(--muted)">Seed with default templates and settings</span>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-green" style="margin-bottom:0">
+      <div class="step-n">STEP 3 — SUBDOMAIN</div>
+      Register: acmecorp.opensign.nexasaas.com<br>
+      <span style="font-size:11px;color:var(--muted)">Wildcard SSL certificate auto-covers it</span>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-green" style="margin-bottom:0">
+      <div class="step-n">STEP 4 — ZITADEL</div>
+      Create Zitadel organization for tenant<br>
+      <span style="font-size:11px;color:var(--muted)">Register admin user, set OIDC config</span>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-green" style="margin-bottom:0">
+      <div class="step-n">STEP 5 — PORTAL DB</div>
+      Insert tenant record in PostgreSQL<br>
+      <span style="font-size:11px;color:var(--muted)">status=trial, trial_ends_at = now + 14 days</span>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-green" style="margin-bottom:0">
+      <div class="step-n">STEP 6 — PLAN ENGINE</div>
+      Assign trial plan limits from plan_limits table<br>
+      <span style="font-size:11px;color:var(--muted)">Full Pro-equivalent access for 14 days</span>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-orange" style="margin-bottom:0">
+      <div class="step-n">STEP 7 — EMAIL</div>
+      Send welcome email with app URL
+      <div class="email-badge">📧 welcome email → acmecorp.opensign.nexasaas.com</div>
+    </div>
+    <div class="arrow-down" style="margin:0 auto;width:2px;height:24px"></div>
+
+    <div class="step-box highlight-blue">
+      <div class="step-n">DONE — &lt;5 SECONDS TOTAL</div>
+      Customer redirected to setup wizard<br>
+      <span style="font-size:11px;color:var(--muted)">14-day trial clock starts</span>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: Billing -->
+<div id="tab-billing" class="diagram-section">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;max-width:1100px">
+
+    <div>
+      <div class="section-band"><div class="dot" style="background:var(--green)"></div>Upgrade Flow</div>
+      <div class="step-box highlight-blue">Customer hits limit OR clicks Upgrade</div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">Plan comparison modal shown<br><span style="font-size:11px;color:var(--muted)">Current plan highlighted</span></div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">Customer selects new plan → clicks Upgrade</div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-purple">Paddle checkout overlay opens<br><span style="font-size:11px;color:var(--muted)">Handles VAT automatically (UAE 5%, Saudi 15%)</span></div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">Payment confirmed → Paddle webhook fires</div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">Portal updates subscription<br><span style="font-size:11px;color:var(--muted)">New limits active IMMEDIATELY</span><div class="email-badge">📧 payment receipt</div></div>
+    </div>
+
+    <div>
+      <div class="section-band"><div class="dot" style="background:var(--red)"></div>Cancellation & Deletion Flow</div>
+      <div class="step-box highlight-blue">Customer clicks Cancel Subscription</div>
+      <div class="connector">↓</div>
+      <div class="step-box" style="border-left:3px solid var(--yellow)">Confirmation modal:<br><span style="font-size:11px;color:var(--muted)">"Access until [date]. Data kept 30 days."</span></div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-green">Cancelled in Paddle → webhook fires<br><span style="font-size:11px;color:var(--muted)">status = cancelled_active</span><div class="email-badge">📧 cancellation confirmed</div></div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-orange">Access continues until billing period ends<br><span style="font-size:11px;color:var(--muted)">status = cancelled_expired</span></div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-red">Day 25: Warning email sent<div class="email-badge">📧 data-deletion-warning</div></div>
+      <div class="connector">↓</div>
+      <div class="step-box highlight-red">Day 30: Auto-delete all tenant data<br><span style="font-size:11px;color:var(--muted)">MongoDB DB dropped, Zitadel org deleted</span><div class="email-badge">📧 data-deleted</div></div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:40px">
+    <div class="section-band"><div class="dot" style="background:var(--yellow)"></div>VAT Handling</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">
+      <div class="node node-green" style="min-width:200px">
+        <div class="node-label">UAE customers</div>
+        <div class="node-title">+5% VAT</div>
+        <div class="node-sub">Added by Paddle automatically</div>
+      </div>
+      <div class="node node-orange" style="min-width:200px">
+        <div class="node-label">Saudi Arabia customers</div>
+        <div class="node-title">+15% VAT</div>
+        <div class="node-sub">Added by Paddle automatically</div>
+      </div>
+      <div class="node node-blue" style="min-width:200px">
+        <div class="node-label">Other countries</div>
+        <div class="node-title">Local tax rules</div>
+        <div class="node-sub">Paddle handles per country</div>
+      </div>
+      <div class="node" style="min-width:200px">
+        <div class="node-label">You</div>
+        <div class="node-title">Zero tax work</div>
+        <div class="node-sub">Paddle remits all taxes on your behalf</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5: Data Lifecycle -->
+<div id="tab-data" class="diagram-section">
+  <div style="max-width:900px">
+    <table class="flow-table">
+      <thead>
+        <tr>
+          <th>Timepoint</th>
+          <th>Event</th>
+          <th>Actor</th>
+          <th>System Action</th>
+          <th>Email Trigger</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="step-num">Signup</td>
+          <td>Email verified</td>
+          <td><span class="actor actor-customer">Customer</span></td>
+          <td>MongoDB DB created, subdomain, Zitadel org, trial starts</td>
+          <td><span class="trigger">welcome</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Day 7</td>
+          <td>Trial reminder</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>Cron job checks trial_ends_at</td>
+          <td><span class="trigger">day-7-reminder</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Day 12</td>
+          <td>Trial reminder</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>Cron job checks trial_ends_at</td>
+          <td><span class="trigger">day-12-reminder</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Day 14</td>
+          <td>Trial expires</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>status → trial_expired, features locked</td>
+          <td><span class="trigger">trial-expired</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Any time</td>
+          <td>Admin extends trial</td>
+          <td><span class="actor actor-admin">Admin</span></td>
+          <td>+7 days max, once only. trial_extended=true</td>
+          <td><span class="trigger">trial-extended</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Any time</td>
+          <td>Customer upgrades</td>
+          <td><span class="actor actor-customer">Customer</span> <span class="actor actor-paddle">Paddle</span></td>
+          <td>Webhook → update plan_limits immediately</td>
+          <td><span class="trigger">payment-receipt</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">80% usage</td>
+          <td>Usage warning</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>Warning UI + prompt shown per feature</td>
+          <td><span class="trigger">80%-warning</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">100% usage</td>
+          <td>Feature blocked</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>Action rejected, upgrade modal shown</td>
+          <td><span class="trigger">100%-blocked</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Renewal</td>
+          <td>Payment success</td>
+          <td><span class="actor actor-paddle">Paddle</span></td>
+          <td>Webhook → usage counters reset</td>
+          <td><span class="trigger">payment-receipt</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Renewal</td>
+          <td>Payment fails</td>
+          <td><span class="actor actor-paddle">Paddle</span></td>
+          <td>Paddle retries → grace period → suspend</td>
+          <td><span class="trigger">payment-failed</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Cancellation</td>
+          <td>Subscription cancelled</td>
+          <td><span class="actor actor-customer">Customer</span></td>
+          <td>status=cancelled_active, access until period end</td>
+          <td><span class="trigger">subscription-cancelled</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Cancel +25d</td>
+          <td>Data warning</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>Cron job → final warning, export reminder</td>
+          <td><span class="trigger">data-deletion-warning</span></td>
+        </tr>
+        <tr>
+          <td class="step-num">Cancel +30d</td>
+          <td>Auto-delete</td>
+          <td><span class="actor actor-system">System</span></td>
+          <td>MongoDB DB dropped, Zitadel org deleted, subdomain removed</td>
+          <td><span class="trigger">data-deleted</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB 6: Build Phases -->
+<div id="tab-phases" class="diagram-section">
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-week">Phase 1 — Month 1-3 — ~200h</div>
+      <div class="timeline-title">Core SaaS Launch</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Goal: First paying customer. OpenSign only.</div>
+      <div class="timeline-tasks">
+        <div class="task-chip" style="border-color:rgba(79,142,247,0.3);color:#7eb3ff">Week 1 — Dev environment</div>
+        <div class="task-chip" style="border-color:rgba(79,142,247,0.3);color:#7eb3ff">Week 2 — DB schema</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">Week 3 — Multi-tenant OpenSign</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">Week 4 — Provisioning script</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Week 5 — Paddle billing</div>
+        <div class="task-chip" style="border-color:rgba(247,147,79,0.3);color:#f7b07e">Week 6 — 15 email triggers</div>
+        <div class="task-chip" style="border-color:rgba(247,212,79,0.3);color:#f7dc7e">Week 7 — Dashboard + admin</div>
+        <div class="task-chip" style="border-color:rgba(247,79,106,0.3);color:#f77e94">Week 8 — Deploy to production</div>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-week" style="color:var(--accent2)">Phase 2 — Month 4-8 — ~120h</div>
+      <div class="timeline-title">Growth</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Goal: 20+ paying customers + mobile launch</div>
+      <div class="timeline-tasks">
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Ticketing app (web)</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">OpenSign mobile (React Native)</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Push notifications (FCM)</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Bundle subscriptions</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Custom domain (Business plan)</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Arabic RTL language</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Audit logs</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">Data export</div>
+        <div class="task-chip" style="border-color:rgba(124,90,247,0.3);color:#a07ef7">App Store + Google Play</div>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-week" style="color:var(--green)">Phase 3 — Year 2</div>
+      <div class="timeline-title">Enterprise</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Goal: First enterprise customer + first white label reseller</div>
+      <div class="timeline-tasks">
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">White label reseller panel ($999/mo)</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">SAML SSO</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">Multi-region hosting</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">SLA management</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">Advanced analytics</div>
+        <div class="task-chip" style="border-color:rgba(62,207,142,0.3);color:#5ed9a8">3rd app integration</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Budget summary -->
+  <div style="margin-top:40px;max-width:600px">
+    <div class="section-band"><div class="dot" style="background:var(--yellow)"></div>Phase 1 Budget — ≤$900 Total</div>
+    <table class="flow-table" style="margin-top:16px">
+      <thead>
+        <tr><th>Item</th><th>Cost</th><th>Type</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>MakerKit (Next.js Supabase)</td><td style="color:var(--orange)">$299</td><td>One-time</td></tr>
+        <tr><td>Domain (nexasaas.com)</td><td style="color:var(--orange)">~$15</td><td>Yearly</td></tr>
+        <tr><td>Railway / Render hosting</td><td style="color:var(--orange)">~$30/mo</td><td>Monthly</td></tr>
+        <tr><td>MongoDB Atlas</td><td style="color:var(--green)">$0</td><td>Free tier</td></tr>
+        <tr><td>Zitadel SSO</td><td style="color:var(--green)">$0</td><td>Self-hosted</td></tr>
+        <tr><td>Resend email</td><td style="color:var(--green)">$0</td><td>Free tier</td></tr>
+        <tr><td>Crisp chat</td><td style="color:var(--green)">$0</td><td>Free tier</td></tr>
+        <tr><td>Paddle</td><td style="color:var(--green)">$0 upfront</td><td>% of revenue</td></tr>
+        <tr style="font-weight:600"><td>Total first 3 months</td><td style="color:var(--yellow)">~$704</td><td>Under $900 ✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.diagram-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

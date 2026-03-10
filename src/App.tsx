@@ -95,7 +95,8 @@ const processOwnerRoadmap = [
     { activity:"Define & Agree Territory Structure", responsible:"Dept. Heads + IT", deadline:"Day 2", note:"Confirm PREFIX-LOCATION naming; approve territory list" },
     { activity:"Review & Validate Service Catalogue per Dept.", responsible:"Each Department Head", deadline:"Day 3", note:"Confirm services, WO types, priority levels per team" },
     { activity:"Collect & Cleanse Asset Master Data from CRM", responsible:"Process Owner + IT", deadline:"Day 3–4", note:"Export assets; validate fields, remove duplicates" },
-    { activity:"Approve Job Sheet Templates", responsible:"Dept. Heads", deadline:"Day 5", note:"PPM Checklist, Normal Service, FF Inspection, Project Completion" },
+    { activity:"Create Child Assets for the Asset Master Data", responsible:"Process Owner", deadline:"Day 3–4", note:"Create child assets under the correct parent asset; verify hierarchy and asset relationships" },
+    { activity:"Finalize the job sheet templates and remove unnecessary job sheets.", responsible:"Dept. Heads", deadline:"Day 5", note:"PPM Checklist, Normal Service, FF Inspection, Project Completion" },
     { activity:"Define PPM Schedules per Asset Type", responsible:"Dept. Heads", deadline:"Day 5", note:"Confirm frequency: monthly, quarterly, semi-annual, annual" },
   ]},
   { week:"Week 2", days:"Days 8–14", color:"#0e9e8e", light:"#d0f5f1", tasks:[
@@ -153,10 +154,10 @@ const outOfScopeItems = [
     owner: "Process Owner / Department Heads + HSE Lead",
     description: "Design, content, and sign-off of all job sheet templates (PPM Checklist, Normal Service, Fire Fighting Inspection, Project Completion). IT will configure the approved templates in FSM only after full Process Owner approval.",
     templates: [
-      "PPM Checklist — 50-Point pass/fail per asset type",
-      "Normal Service — Reactive repairs & call-out form",
-      "Fire Fighting Inspection — Safety compliance audit",
-      "Project Completion — Handover & commissioning sign-off",
+      "PPM Checklist",
+      "Normal Service ",
+      "Fire Fighting Inspection",
+      "Project Completion",
     ],
     note: "IT will not build templates without a fully approved and signed-off template document from the Process Owner.",
   },
@@ -164,13 +165,9 @@ const outOfScopeItems = [
     category: "PPM Schedule Configuration",
     icon: "🔄",
     owner: "Process Owner / EOM & GOT Department Heads",
-    description: "Define and document PPM frequencies, asset types covered, and maintenance intervals. IT will configure the schedule in FSM only after the Process Owner provides a finalized and approved PPM matrix.",
+    description: "Define and document PPM frequencies, asset types covered, and maintenance intervals.",
     templates: [
-      "Monthly — PRV & ECV Test schedule",
-      "Monthly — CGS Walk-through plan",
-      "Quarterly — M&R Station Service list",
-      "Semi-Annual — DRS Inspection calendar",
-      "Annual — Pipeline Integrity review",
+      
     ],
     note: "The PPM matrix must be submitted to IT in writing before Week 2 Day 6 to avoid schedule delays.",
   },
@@ -1115,89 +1112,67 @@ function ServiceFlowSection({ isMobile }: ResponsiveProps) {
   );
 }
 
+// ─── ROADMAP SCHEDULE CONFIG (module-level) ───────────
+const roadmapScheduleConfig = {
+  overallTimeline: "24 February 2026 – 16 March 2026",
+  overallStart: new Date(2026, 1, 24),
+  overallEnd: new Date(2026, 2, 16),
+  weekStarts: [new Date(2026, 1, 24), new Date(2026, 2, 3), new Date(2026, 2, 10)],
+  workingDaysPerWeek: 5,
+  followUpMeetings: { week1: "03/Mar/2026", week2: "10/Mar/2026", week3: "17/Mar/2026" },
+  weekStartLabels: ["24/Feb/2026", "03/Mar/2026", "10/Mar/2026"],
+} as const;
+
+const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
+const toDateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+const addBusinessDays = (date: Date, daysToAdd: number) => {
+  const next = new Date(date);
+  let added = 0;
+  while (added < daysToAdd) {
+    next.setDate(next.getDate() + 1);
+    if (!isWeekend(next)) added += 1;
+  }
+  return next;
+};
+const getCalendarDateFromWeekDay = (weekNumber: number, dayIndex: number) => {
+  if (weekNumber < 1 || weekNumber > roadmapScheduleConfig.weekStarts.length) return null;
+  if (dayIndex < 1 || dayIndex > roadmapScheduleConfig.workingDaysPerWeek) return null;
+  return addBusinessDays(roadmapScheduleConfig.weekStarts[weekNumber - 1], dayIndex - 1);
+};
+const getLegacyCalendarDateFromAbsoluteDay = (absoluteDay: number) => {
+  const legacy = new Date(roadmapScheduleConfig.overallStart);
+  legacy.setDate(legacy.getDate() + absoluteDay - 1);
+  return legacy;
+};
+const getWeekDayFromCalendarDate = (date: Date) => {
+  const dateKey = toDateKey(date);
+  for (let wn = 1; wn <= roadmapScheduleConfig.weekStarts.length; wn++) {
+    for (let di = 1; di <= roadmapScheduleConfig.workingDaysPerWeek; di++) {
+      const d = getCalendarDateFromWeekDay(wn, di);
+      if (d && toDateKey(d) === dateKey) return { weekNumber: wn, dayIndex: di };
+    }
+  }
+  return null;
+};
+const normalizeDeadlineLabel = (deadline: string, weekNumber: number) => {
+  const match = deadline.match(/Day\s*(\d+)(?:\s*[–-]\s*(\d+))?/);
+  if (!match) return deadline;
+  const convertDay = (day: number) => {
+    if (day >= 1 && day <= roadmapScheduleConfig.workingDaysPerWeek) return day;
+    const mapped = getWeekDayFromCalendarDate(getLegacyCalendarDateFromAbsoluteDay(day));
+    if (mapped && mapped.weekNumber === weekNumber) return mapped.dayIndex;
+    const weekBase = (weekNumber - 1) * 7 + 1;
+    return Math.max(1, Math.min(roadmapScheduleConfig.workingDaysPerWeek, day - weekBase + 1));
+  };
+  const dayStart = convertDay(Number(match[1]));
+  const dayEnd = match[2] ? convertDay(Number(match[2])) : null;
+  if (!dayEnd || dayEnd === dayStart) return `Day ${dayStart}`;
+  const sorted = [dayStart, dayEnd].sort((a, b) => a - b);
+  return `Day ${sorted[0]}–${sorted[1]}`;
+};
+
 // ─── ROADMAP ──────────────────────────────────────────
 function RoadmapSection({ isMobile }: ResponsiveProps) {
-  const roadmapScheduleConfig = {
-    overallTimeline: "24 February 2026 – 16 March 2026",
-    overallStart: new Date(2026, 1, 24),
-    overallEnd: new Date(2026, 2, 16),
-    weekStarts: [new Date(2026, 1, 24), new Date(2026, 2, 3), new Date(2026, 2, 10)],
-    workingDaysPerWeek: 5,
-    followUpMeetings: {
-      week1: "03/Mar/2026",
-      week2: "10/Mar/2026",
-      week3: "17/Mar/2026",
-    },
-    weekStartLabels: ["24/Feb/2026", "03/Mar/2026", "10/Mar/2026"],
-  } as const;
-
-  const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
-  const toDateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-  const addBusinessDays = (date: Date, daysToAdd: number) => {
-    const next = new Date(date);
-    let added = 0;
-    while (added < daysToAdd) {
-      next.setDate(next.getDate() + 1);
-      if (!isWeekend(next)) {
-        added += 1;
-      }
-    }
-    return next;
-  };
-  const getCalendarDateFromWeekDay = (weekNumber: number, dayIndex: number) => {
-    if (weekNumber < 1 || weekNumber > roadmapScheduleConfig.weekStarts.length) {
-      return null;
-    }
-    if (dayIndex < 1 || dayIndex > roadmapScheduleConfig.workingDaysPerWeek) {
-      return null;
-    }
-    return addBusinessDays(roadmapScheduleConfig.weekStarts[weekNumber - 1], dayIndex - 1);
-  };
-  const getWeekDayFromCalendarDate = (date: Date) => {
-    const dateKey = toDateKey(date);
-    for (let weekNumber = 1; weekNumber <= roadmapScheduleConfig.weekStarts.length; weekNumber += 1) {
-      for (let dayIndex = 1; dayIndex <= roadmapScheduleConfig.workingDaysPerWeek; dayIndex += 1) {
-        const mappedDate = getCalendarDateFromWeekDay(weekNumber, dayIndex);
-        if (mappedDate && toDateKey(mappedDate) === dateKey) {
-          return { weekNumber, dayIndex };
-        }
-      }
-    }
-    return null;
-  };
-  const getLegacyCalendarDateFromAbsoluteDay = (absoluteDay: number) => {
-    const legacy = new Date(roadmapScheduleConfig.overallStart);
-    legacy.setDate(legacy.getDate() + absoluteDay - 1);
-    return legacy;
-  };
-  const normalizeDeadlineLabel = (deadline: string, weekNumber: number) => {
-    const match = deadline.match(/Day\s*(\d+)(?:\s*[–-]\s*(\d+))?/);
-    if (!match) {
-      return deadline;
-    }
-
-    const convertDay = (day: number) => {
-      if (day >= 1 && day <= roadmapScheduleConfig.workingDaysPerWeek) {
-        return day;
-      }
-
-      const mapped = getWeekDayFromCalendarDate(getLegacyCalendarDateFromAbsoluteDay(day));
-      if (mapped && mapped.weekNumber === weekNumber) {
-        return mapped.dayIndex;
-      }
-
-      const weekBase = (weekNumber - 1) * 7 + 1;
-      return Math.max(1, Math.min(roadmapScheduleConfig.workingDaysPerWeek, day - weekBase + 1));
-    };
-
-    const dayStart = convertDay(Number(match[1]));
-    const dayEnd = match[2] ? convertDay(Number(match[2])) : null;
-    if (!dayEnd || dayEnd === dayStart) {
-      return `Day ${dayStart}`;
-    }
-    const sorted = [dayStart, dayEnd].sort((a, b) => a - b);
-    return `Day ${sorted[0]}–${sorted[1]}`;
-  };
 
   const [scope, setScope] = useState<"process" | "it">("process");
   const [expandedWeek, setExpandedWeek] = useState<string | null>("Week 1");
@@ -1315,7 +1290,7 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
           <div style={{ background:C.amber, borderRadius:10, width:44, height:44, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>⚠️</div>
           <div>
             <div style={{ fontSize:10, fontWeight:700, color:C.amber, textTransform:"uppercase", letterSpacing:2, marginBottom:4 }}>Scope Boundary</div>
-            <h3 style={{ margin:"0 0 4px", fontSize:20, fontWeight:900, color:C.navy, fontFamily:"Georgia,serif" }}>Out of Implementation Scope — Process Owner Responsibilities</h3>
+            <h3 style={{ margin:"0 0 4px", fontSize:20, fontWeight:900, color:C.navy, fontFamily:"Georgia,serif" }}>Out of Implementation Scope</h3>
             <p style={{ margin:0, fontSize:13, color:C.slate, lineHeight:1.65 }}>The following items are <strong>not included</strong> in the technical implementation scope. They must be owned, designed, and approved by the Process Owner before IT can configure them in the system.</p>
           </div>
         </div>
@@ -1337,7 +1312,7 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
                 <div style={{ padding:"14px 18px", borderTop:`1px solid ${C.amber}20` }}>
                   <p style={{ margin:"0 0 12px", fontSize:12, color:"#334155", lineHeight:1.65 }}>{item.description}</p>
                   <div style={{ marginBottom:12 }}>
-                    <div style={{ fontSize:10, fontWeight:700, color:C.amber, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Deliverables Process Owner Must Provide</div>
+                    <div style={{ fontSize:10, fontWeight:700, color:C.amber, textTransform:"uppercase", letterSpacing:1, marginBottom:8 }}>Deliverables Process Owner</div>
                     {item.templates.map((t,j) => (
                       <div key={j} style={{ display:"flex", gap:8, alignItems:"flex-start", marginBottom:6 }}>
                         <div style={{ width:5, height:5, borderRadius:"50%", background:C.amber, marginTop:6, flexShrink:0 }} />
@@ -1345,10 +1320,10 @@ function RoadmapSection({ isMobile }: ResponsiveProps) {
                       </div>
                     ))}
                   </div>
-                  <div style={{ background:C.amberLight, border:`1px solid ${C.amber}40`, borderRadius:8, padding:"9px 12px", display:"flex", gap:8, alignItems:"flex-start" }}>
+                  {/*<div style={{ background:C.amberLight, border:`1px solid ${C.amber}40`, borderRadius:8, padding:"9px 12px", display:"flex", gap:8, alignItems:"flex-start" }}>
                     <span style={{ fontSize:14, flexShrink:0 }}>📌</span>
                     <span style={{ fontSize:11, color:"#7c3d12", lineHeight:1.6 }}><strong>Dependency Note:</strong> {item.note}</span>
-                  </div>
+                  </div>*/}
                 </div>
               )}
             </div>
@@ -1456,11 +1431,572 @@ function LimitationsSection({ isMobile }: ResponsiveProps) {
   );
 }
 
+// ─── TASK MANAGEMENT ──────────────────────────────────
+type TaskStatus = "Not Started" | "In Progress" | "Complete" | "Blocked";
+
+interface ImplTask {
+  id: string; taskName: string; dueDate: string; completionDate: string;
+  status: TaskStatus; notes: string; scope: "process-owner" | "it"; week: string;
+}
+interface WeeklyTask {
+  id: string; task: string; dueDate: string; completedDate: string;
+  status: TaskStatus; notes: string;
+}
+
+const DEPT_COLORS: Record<string, { bg: string; light: string; text: string }> = {
+  eom: { bg: C.eom.bg, light: C.eom.light, text: C.eom.text },
+  fft: { bg: C.fft.bg, light: C.fft.light, text: C.fft.text },
+  got: { bg: C.got.bg, light: C.got.light, text: C.got.text },
+  cst: { bg: C.cst.bg, light: C.cst.light, text: C.cst.text },
+  pt:  { bg: C.pt.bg,  light: C.pt.light,  text: C.pt.text  },
+  ig:  { bg: C.ig.bg,  light: C.ig.light,  text: C.ig.text  },
+  it:  { bg: "#0284c7", light: "#e0f2fe", text: "#0c4a6e" },
+};
+
+const DEPT_TABS = [
+  { id: "eom", label: "EOM", name: "Gas Emergency & Operations" },
+  { id: "fft", label: "FFT", name: "Firefighting Team" },
+  { id: "got", label: "GOT", name: "Gas Operations Team" },
+  { id: "cst", label: "CST", name: "Customer Service Team" },
+  { id: "pt",  label: "PT",  name: "Project Team" },
+  { id: "ig",  label: "IG",  name: "Industrial Gas" },
+  { id: "it",  label: "IT",  name: "IT Department" },
+] as const;
+
+type DeptId = (typeof DEPT_TABS)[number]["id"];
+
+const STATUS_COLORS: Record<TaskStatus, { bg: string; color: string }> = {
+  "Not Started": { bg: C.slateLight, color: C.slate },
+  "In Progress":  { bg: "#dbeafe", color: "#1d4ed8" },
+  "Complete":     { bg: "#dcfce7", color: "#15803d" },
+  "Blocked":      { bg: "#fee2e2", color: "#dc2626" },
+};
+
+function buildPoTasks(): ImplTask[] {
+  const out: ImplTask[] = [];
+  processOwnerRoadmap.forEach(w => w.tasks.forEach((t, i) => out.push({
+    id: `po-${w.week}-${i}`, taskName: t.activity, dueDate: t.deadline,
+    completionDate: "", status: "Not Started", notes: t.note,
+    scope: "process-owner", week: w.week,
+  })));
+  return out;
+}
+function buildItTasks(): ImplTask[] {
+  const out: ImplTask[] = [];
+  itRoadmap.forEach(w => w.tasks.forEach((t, i) => out.push({
+    id: `it-${w.week}-${i}`, taskName: t.activity, dueDate: t.deadline,
+    completionDate: "", status: "Not Started", notes: t.note,
+    scope: "it", week: w.week,
+  })));
+  return out;
+}
+
+function initAllTasks(): Record<DeptId, ImplTask[]> {
+  return {
+    eom: buildPoTasks(), fft: buildPoTasks(), got: buildPoTasks(),
+    cst: buildPoTasks(), pt: buildPoTasks(),  ig: buildPoTasks(),
+    it: buildItTasks(),
+  };
+}
+
+// ─── DATE HELPERS ─────────────────────────────────────
+const WEEK_NUMBER: Record<string, number> = { "Week 1": 1, "Week 2": 2, "Week 3": 3 };
+const WEEK_BASE_DAY: Record<string, number> = { "Week 1": 1, "Week 2": 8, "Week 3": 15 };
+
+function calcDueDate(deadline: string, week: string): string {
+  const weekNumber = WEEK_NUMBER[week];
+  if (!weekNumber) return deadline;
+  const m = deadline.match(/Day\s*(\d+)(?:\s*[–\-]\s*(\d+))?/i);
+  if (!m) return deadline;
+  const absDay = m[2] ? parseInt(m[2], 10) : parseInt(m[1], 10);
+  const weekBase = WEEK_BASE_DAY[week] ?? 1;
+  const dayIndex = Math.max(1, Math.min(roadmapScheduleConfig.workingDaysPerWeek, absDay - weekBase + 1));
+  const date = getCalendarDateFromWeekDay(weekNumber, dayIndex);
+  if (!date) return deadline;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function formatTaskDate(value: string): string {
+  if (!value) return "";
+  const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const y = Number(isoMatch[1]);
+    const m = Number(isoMatch[2]);
+    const d = Number(isoMatch[3]);
+    const date = new Date(y, m - 1, d);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    }
+  }
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+  return value;
+}
+
+function StatusSelect({ value, onChange }: { value: TaskStatus; onChange: (v: TaskStatus) => void }) {
+  const sc = STATUS_COLORS[value];
+  return (
+    <select value={value} onChange={e => onChange(e.target.value as TaskStatus)}
+      style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}40`, borderRadius: 6,
+        padding: "3px 6px", fontSize: 11, fontWeight: 700, cursor: "pointer", outline: "none", width: "100%" }}>
+      {(["Not Started","In Progress","Complete","Blocked"] as TaskStatus[]).map(s => (
+        <option key={s} value={s}>{s}</option>
+      ))}
+    </select>
+  );
+}
+
+function ReadOnlyField({ value, placeholder = "—" }: { value: string; placeholder?: string }) {
+  return (
+    <span style={{ fontSize: 12, color: value ? C.navy : C.slate, fontStyle: value ? "normal" : "italic" }}>
+      {value || placeholder}
+    </span>
+  );
+}
+
+function toDateInputValue(value: string): string {
+  if (!value) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const y = parsed.getFullYear();
+  const m = String(parsed.getMonth() + 1).padStart(2, "0");
+  const d = String(parsed.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function ImplTaskTable({ tasks, onUpdate, isMobile, isUnlocked }: {
+  tasks: ImplTask[]; isMobile: boolean; isUnlocked: boolean;
+  onUpdate: (id: string, field: "completionDate"|"status"|"notes", val: string) => void;
+}) {
+  const weeks = Array.from(new Set(tasks.map(t => t.week)));
+  const weekColors: Record<string, { color: string; light: string }> = {
+    "Week 1": { color: "#2563eb", light: "#eff6ff" },
+    "Week 2": { color: "#0e9e8e", light: "#d0f5f1" },
+    "Week 3": { color: "#e8922a", light: "#fdf3e7" },
+  };
+
+  function DueDateCell({ deadline, week }: { deadline: string; week: string }) {
+    const calDate = calcDueDate(deadline, week);
+    return (
+      <div>
+        {calDate
+          ? <span style={{ fontWeight: 700, color: C.navy, fontSize: 12 }}>{calDate}</span>
+          : <span style={{ color: C.slate, fontSize: 12 }}>{deadline}</span>}
+        <div style={{ fontSize: 10, color: C.slate, marginTop: 1 }}>{deadline}</div>
+      </div>
+    );
+  }
+
+  const inputStyle: CSSProperties = {
+    width: "100%",
+    border: `1px solid ${C.border}`,
+    borderRadius: 6,
+    padding: "5px 8px",
+    fontSize: 11,
+    outline: "none",
+    background: C.white,
+    color: C.navy,
+    fontFamily: "inherit",
+    colorScheme: "light",
+  };
+
+  if (isMobile) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {weeks.map(week => {
+          const wc = weekColors[week] || { color: C.slate, light: C.slateLight };
+          const wTasks = tasks.filter(t => t.week === week);
+          return (
+            <div key={week}>
+              <div style={{ background: wc.light, borderLeft: `4px solid ${wc.color}`, borderRadius: "8px 8px 0 0",
+                padding: "8px 12px", fontSize: 12, fontWeight: 800, color: wc.color, marginBottom: 4 }}>
+                {week} {wTasks[0]?.scope === "it" ? "— IT Scope" : "— Process Owner Scope"}
+              </div>
+              {wTasks.map(t => (
+                <div key={t.id} style={{ border: `1px solid ${C.border}`, borderRadius: 8, background: C.white, padding: "10px 12px", marginBottom: 6 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: C.navy, marginBottom: 6 }}>{t.taskName}</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 6, alignItems: "center" }}>
+                    <DueDateCell deadline={t.dueDate} week={t.week} />
+                    {t.scope === "it" && <Pill label="IT Scope" bg="#e0f2fe" color="#0284c7" />}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: C.slate, fontWeight: 600, marginBottom: 3 }}>COMPLETION DATE</div>
+                      {isUnlocked
+                        ? <input type="date" value={toDateInputValue(t.completionDate)} onChange={e => onUpdate(t.id, "completionDate", e.target.value)} style={{ ...inputStyle, padding: "4px 6px" }} />
+                        : <ReadOnlyField value={formatTaskDate(t.completionDate)} />}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, color: C.slate, fontWeight: 600, marginBottom: 3 }}>STATUS</div>
+                      {isUnlocked
+                        ? <StatusSelect value={t.status} onChange={v => onUpdate(t.id, "status", v)} />
+                        : <Pill label={t.status} bg={STATUS_COLORS[t.status].bg} color={STATUS_COLORS[t.status].color} />}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: C.slate, fontWeight: 600, marginBottom: 3 }}>REMARKS</div>
+                    {isUnlocked
+                      ? <textarea value={t.notes} onChange={e => onUpdate(t.id, "notes", e.target.value)} rows={3}
+                          style={{ ...inputStyle, padding: "4px 6px", resize: "vertical", minHeight: 56 }} />
+                      : <ReadOnlyField value={t.notes} />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "2.5fr 1fr 1fr 1fr 1.8fr", background: "#f8fafc", borderBottom: `1px solid ${C.border}` }}>
+        {["Task Name","Due Date","Completion Date","Status","Remarks"].map(h => (
+          <div key={h} style={{ padding: "9px 12px", fontSize: 10, fontWeight: 700, color: C.slate, textTransform: "uppercase", letterSpacing: 0.8, borderLeft: h!=="Task Name" ? `1px solid ${C.border}` : "none" }}>{h}</div>
+        ))}
+      </div>
+      {weeks.map(week => {
+        const wc = weekColors[week] || { color: C.slate, light: C.slateLight };
+        const wTasks = tasks.filter(t => t.week === week);
+        return (
+          <div key={week}>
+            <div style={{ background: wc.light, borderBottom: `1px solid ${C.border}`, padding: "7px 12px", display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontWeight: 800, fontSize: 12, color: wc.color }}>{week}</span>
+              <span style={{ fontSize: 11, color: wc.color, opacity: 0.7 }}>— {wTasks[0]?.scope === "it" ? "IT Scope" : "Process Owner Scope"}</span>
+            </div>
+            {wTasks.map((t, idx) => (
+              <div key={t.id} style={{ display: "grid", gridTemplateColumns: "2.5fr 1fr 1fr 1fr 1.8fr",
+                background: idx % 2 === 0 ? C.white : "#fafbfc", borderBottom: `1px solid ${C.border}`, alignItems: "center" }}>
+                <div style={{ padding: "10px 12px", display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  {t.scope === "it" && <Pill label="IT" bg="#e0f2fe" color="#0284c7" style={{ flexShrink: 0, marginTop: 1 }} />}
+                  <span style={{ fontSize: 12, fontWeight: 600, color: C.navy, lineHeight: 1.45 }}>{t.taskName}</span>
+                </div>
+                <div style={{ padding: "10px 12px", borderLeft: `1px solid ${C.border}` }}>
+                  <DueDateCell deadline={t.dueDate} week={t.week} />
+                </div>
+                <div style={{ padding: "10px 12px", borderLeft: `1px solid ${C.border}` }}>
+                  {isUnlocked
+                    ? <input type="date" value={toDateInputValue(t.completionDate)} onChange={e => onUpdate(t.id, "completionDate", e.target.value)} style={inputStyle} />
+                    : <ReadOnlyField value={formatTaskDate(t.completionDate)} />}
+                </div>
+                <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>
+                  {isUnlocked
+                    ? <StatusSelect value={t.status} onChange={v => onUpdate(t.id, "status", v)} />
+                    : <Pill label={t.status} bg={STATUS_COLORS[t.status].bg} color={STATUS_COLORS[t.status].color} />}
+                </div>
+                <div style={{ padding: "10px 12px", borderLeft: `1px solid ${C.border}` }}>
+                  {isUnlocked
+                    ? <textarea value={t.notes} onChange={e => onUpdate(t.id, "notes", e.target.value)} rows={2}
+                        style={{ ...inputStyle, resize: "vertical", minHeight: 48 }} />
+                    : <ReadOnlyField value={t.notes} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function WeeklyPlanTable({ tasks, onUpdate, onAdd, onRemove, isMobile, isUnlocked }: {
+  tasks: WeeklyTask[]; isMobile: boolean; isUnlocked: boolean;
+  onUpdate: (id: string, field: keyof Omit<WeeklyTask,"id">, val: string) => void;
+  onAdd: () => void; onRemove: (id: string) => void;
+}) {
+  const inputStyle: CSSProperties = {
+    width: "100%",
+    border: `1px solid ${C.border}`,
+    borderRadius: 6,
+    padding: "5px 8px",
+    fontSize: 11,
+    outline: "none",
+    background: C.white,
+    color: C.navy,
+    fontFamily: "inherit",
+    colorScheme: "light",
+  };
+
+  if (isMobile) {
+    return (
+      <div>
+        {tasks.length === 0 && !isUnlocked && (
+          <div style={{ textAlign: "center", padding: "16px 0", color: C.slate, fontSize: 13, fontStyle: "italic" }}>No weekly tasks yet.</div>
+        )}
+        {tasks.map(t => (
+          <div key={t.id} style={{ border: `1px solid ${C.border}`, borderRadius: 8, background: C.white, padding: "10px 12px", marginBottom: 6 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 6, marginBottom: 6 }}>
+              {isUnlocked
+                ? <input placeholder="Task description" value={t.task} onChange={e => onUpdate(t.id,"task",e.target.value)} style={inputStyle} />
+                : <span style={{ fontSize: 12, fontWeight: 600, color: C.navy }}>{t.task || "—"}</span>}
+              {isUnlocked && <button onClick={() => onRemove(t.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#dc2626", fontSize: 12, fontWeight: 700 }}>✕</button>}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
+              {isUnlocked ? <input placeholder="Due date" value={t.dueDate} onChange={e => onUpdate(t.id,"dueDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.dueDate} placeholder="No date" />}
+              {isUnlocked ? <input placeholder="Completed date" value={t.completedDate} onChange={e => onUpdate(t.id,"completedDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.completedDate} placeholder="Not completed" />}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+              {isUnlocked ? <StatusSelect value={t.status} onChange={v => onUpdate(t.id,"status",v)} /> : <Pill label={t.status} bg={STATUS_COLORS[t.status].bg} color={STATUS_COLORS[t.status].color} />}
+              {isUnlocked ? <input placeholder="Notes" value={t.notes} onChange={e => onUpdate(t.id,"notes",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.notes} />}
+            </div>
+          </div>
+        ))}
+        {isUnlocked && <button onClick={onAdd} style={{ width: "100%", border: `2px dashed ${C.teal}`, background: C.tealLight, borderRadius: 8, padding: "10px", cursor: "pointer", color: C.teal, fontWeight: 700, fontSize: 13 }}>+ Add Weekly Task</button>}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isUnlocked ? "2fr 0.9fr 1fr 1fr 1.6fr 0.4fr" : "2fr 0.9fr 1fr 1fr 1.6fr", background: "#f8fafc", borderBottom: `1px solid ${C.border}` }}>
+          {["Task","Due Date","Completed Date","Status","Notes", ...(isUnlocked ? [""] : [])].map((h, i) => (
+            <div key={i} style={{ padding: "9px 12px", fontSize: 10, fontWeight: 700, color: C.slate, textTransform: "uppercase", letterSpacing: 0.8, borderLeft: i > 0 ? `1px solid ${C.border}` : "none" }}>{h}</div>
+          ))}
+        </div>
+        {tasks.length === 0 && (
+          <div style={{ padding: "20px", textAlign: "center", color: C.slate, fontSize: 13, fontStyle: "italic" }}>
+            {isUnlocked ? "No weekly tasks yet. Click + Add Weekly Task to get started." : "No weekly tasks yet."}
+          </div>
+        )}
+        {tasks.map((t, idx) => (
+          <div key={t.id} style={{ display: "grid", gridTemplateColumns: isUnlocked ? "2fr 0.9fr 1fr 1fr 1.6fr 0.4fr" : "2fr 0.9fr 1fr 1fr 1.6fr",
+            background: idx % 2 === 0 ? C.white : "#fafbfc", borderBottom: idx < tasks.length - 1 ? `1px solid ${C.border}` : "none", alignItems: "center" }}>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px" }}>{isUnlocked ? <input placeholder="Task description" value={t.task} onChange={e => onUpdate(t.id,"task",e.target.value)} style={inputStyle} /> : <span style={{ fontSize: 12, fontWeight: 600, color: C.navy }}>{t.task || "—"}</span>}</div>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input placeholder="Date" value={t.dueDate} onChange={e => onUpdate(t.id,"dueDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.dueDate} />}</div>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input placeholder="Date" value={t.completedDate} onChange={e => onUpdate(t.id,"completedDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.completedDate} />}</div>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <StatusSelect value={t.status} onChange={v => onUpdate(t.id,"status",v)} /> : <Pill label={t.status} bg={STATUS_COLORS[t.status].bg} color={STATUS_COLORS[t.status].color} />}</div>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input placeholder="Notes" value={t.notes} onChange={e => onUpdate(t.id,"notes",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.notes} />}</div>
+            {isUnlocked && <div style={{ padding: "6px 8px", borderLeft: `1px solid ${C.border}`, textAlign: "center" }}>
+              <button onClick={() => onRemove(t.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 6, width: 26, height: 26, cursor: "pointer", color: "#dc2626", fontSize: 13, fontWeight: 700, lineHeight: 1 }}>✕</button>
+            </div>}
+          </div>
+        ))}
+      </div>
+      {isUnlocked && <button onClick={onAdd} style={{ marginTop: 10, border: `2px dashed ${C.teal}`, background: C.tealLight, borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: C.teal, fontWeight: 700, fontSize: 13 }}>+ Add Weekly Task</button>}
+    </div>
+  );
+}
+
+function TaskManagementSection({ isMobile }: ResponsiveProps) {
+  const [activeDept, setActiveDept] = useState<DeptId>("eom");
+  const [implTasks, setImplTasks] = useState<Record<DeptId, ImplTask[]>>(() => {
+    try {
+      const saved = localStorage.getItem("fsm_impl_tasks");
+      if (saved) return JSON.parse(saved) as Record<DeptId, ImplTask[]>;
+    } catch {}
+    return initAllTasks();
+  });
+  const [weeklyTasks, setWeeklyTasks] = useState<Record<DeptId, WeeklyTask[]>>(() => {
+    try {
+      const saved = localStorage.getItem("fsm_weekly_tasks");
+      if (saved) return JSON.parse(saved) as Record<DeptId, WeeklyTask[]>;
+    } catch {}
+    return { eom: [], fft: [], got: [], cst: [], pt: [], ig: [], it: [] };
+  });
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
+
+  useEffect(() => {
+    try { localStorage.setItem("fsm_impl_tasks", JSON.stringify(implTasks)); } catch {}
+  }, [implTasks]);
+
+  useEffect(() => {
+    try { localStorage.setItem("fsm_weekly_tasks", JSON.stringify(weeklyTasks)); } catch {}
+  }, [weeklyTasks]);
+
+  function handleUnlock() {
+    const correct = import.meta.env.VITE_TASK_EDIT_PASSWORD;
+    if (pwInput === correct) {
+      setIsUnlocked(true);
+      setShowModal(false);
+      setPwInput("");
+      setPwError(false);
+    } else {
+      setPwError(true);
+    }
+  }
+
+  function handleLock() {
+    setIsUnlocked(false);
+  }
+
+  const deptColor = DEPT_COLORS[activeDept];
+  const currentDept = DEPT_TABS.find(d => d.id === activeDept)!;
+
+  function updateImplTask(id: string, field: "completionDate"|"status"|"notes", val: string) {
+    setImplTasks(prev => ({
+      ...prev,
+      [activeDept]: prev[activeDept].map(t => t.id === id ? { ...t, [field]: val } : t),
+    }));
+  }
+
+  function addWeeklyTask() {
+    const newTask: WeeklyTask = {
+      id: `wt-${activeDept}-${Date.now()}`, task: "", dueDate: "", completedDate: "", status: "Not Started", notes: "",
+    };
+    setWeeklyTasks(prev => ({ ...prev, [activeDept]: [...prev[activeDept], newTask] }));
+  }
+
+  function updateWeeklyTask(id: string, field: keyof Omit<WeeklyTask,"id">, val: string) {
+    setWeeklyTasks(prev => ({
+      ...prev,
+      [activeDept]: prev[activeDept].map(t => t.id === id ? { ...t, [field]: val } : t),
+    }));
+  }
+
+  function removeWeeklyTask(id: string) {
+    setWeeklyTasks(prev => ({ ...prev, [activeDept]: prev[activeDept].filter(t => t.id !== id) }));
+  }
+
+  const tasks = implTasks[activeDept];
+  const done = tasks.filter(t => t.status === "Complete").length;
+  const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+
+  return (
+    <div>
+      {/* Password Modal */}
+      {showModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center" }}
+          onClick={() => { setShowModal(false); setPwInput(""); setPwError(false); }}>
+          <div style={{ background: C.white, borderRadius: 16, padding: "32px 28px", width: 340, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 32, textAlign: "center", marginBottom: 8 }}>🔒</div>
+            <div style={{ fontWeight: 900, fontSize: 17, color: C.navy, textAlign: "center", marginBottom: 4 }}>Edit Mode</div>
+            <div style={{ fontSize: 12, color: C.slate, textAlign: "center", marginBottom: 20 }}>Enter your password to unlock editing</div>
+            <input
+              type="password" value={pwInput} autoFocus
+              placeholder="Password"
+              onChange={e => { setPwInput(e.target.value); setPwError(false); }}
+              onKeyDown={e => e.key === "Enter" && handleUnlock()}
+              style={{ width: "100%", border: `2px solid ${pwError ? "#dc2626" : C.border}`, borderRadius: 8, padding: "10px 12px", fontSize: 14, outline: "none", marginBottom: 8, boxSizing: "border-box" as const }} />
+            {pwError && <div style={{ color: "#dc2626", fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Incorrect password. Please try again.</div>}
+            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+              <button onClick={() => { setShowModal(false); setPwInput(""); setPwError(false); }}
+                style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 8, background: C.white, cursor: "pointer", fontWeight: 700, fontSize: 13, color: C.slate }}>
+                Cancel
+              </button>
+              <button onClick={handleUnlock}
+                style={{ flex: 1, padding: "10px", border: "none", borderRadius: 8, background: C.teal, cursor: "pointer", fontWeight: 700, fontSize: 13, color: "#fff" }}>
+                Unlock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <SectionHeader eyebrow="Project Tracking" title="Task Management" subtitle="Track implementation tasks and weekly plans across all departments" />
+
+      {/* Department Tabs */}
+      <div style={{ background: C.white, borderRadius: 14, border: `1px solid ${C.border}`, padding: "4px 6px", marginBottom: 20, display: "flex", gap: 4, overflowX: "auto", WebkitOverflowScrolling: "touch" as any, flexWrap: isMobile ? "nowrap" : "wrap" }}>
+        {DEPT_TABS.map(d => {
+          const dc = DEPT_COLORS[d.id];
+          const active = activeDept === d.id;
+          return (
+            <button key={d.id} onClick={() => setActiveDept(d.id)}
+              style={{ padding: isMobile ? "8px 12px" : "9px 18px", border: "none", cursor: "pointer", borderRadius: 10,
+                background: active ? dc.bg : "transparent", color: active ? "#fff" : C.slate,
+                fontWeight: 700, fontSize: isMobile ? 11 : 12, transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0,
+                boxShadow: active ? `0 2px 8px ${dc.bg}40` : "none" }}>
+              {d.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Dept Header */}
+      <div style={{ background: `linear-gradient(135deg,${deptColor.bg} 0%,${deptColor.bg}cc 100%)`, borderRadius: 14, padding: isMobile ? "16px 18px" : "20px 28px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Active Department</div>
+          <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 900, color: "#fff" }}>{currentDept.name}</div>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>
+            {activeDept === "it" ? "IT Scope tasks" : "Process Owner Scope tasks"}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+          {[{ label: "Total Tasks", val: tasks.length }, { label: "Complete", val: done }, { label: "Progress", val: `${pct}%` }].map(s => (
+            <div key={s.label} style={{ background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "10px 16px", textAlign: "center", minWidth: 70 }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#fff" }}>{s.val}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.65)", textTransform: "uppercase", letterSpacing: 0.8 }}>{s.label}</div>
+            </div>
+          ))}
+          {isUnlocked
+            ? <button onClick={handleLock} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", border: "2px solid rgba(255,255,255,0.4)", borderRadius: 10, background: "rgba(255,255,255,0.15)", cursor: "pointer", color: "#fff", fontWeight: 700, fontSize: 12 }}>
+                🔓 <span>Editing — Lock</span>
+              </button>
+            : <button onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", border: "2px solid rgba(255,255,255,0.25)", borderRadius: 10, background: "rgba(0,0,0,0.2)", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontWeight: 700, fontSize: 12 }}>
+                🔒 <span>Edit Mode</span>
+              </button>}
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ background: C.white, borderRadius: 10, border: `1px solid ${C.border}`, padding: "12px 16px", marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: C.navy }}>Overall Progress</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: deptColor.bg }}>{pct}%</span>
+        </div>
+        <div style={{ background: C.slateLight, borderRadius: 8, height: 8 }}>
+          <div style={{ background: deptColor.bg, borderRadius: 8, height: 8, width: `${pct}%`, transition: "width 0.4s" }} />
+        </div>
+        <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+          {(["Not Started","In Progress","Complete","Blocked"] as TaskStatus[]).map(s => {
+            const sc = STATUS_COLORS[s]; const cnt = tasks.filter(t => t.status === s).length;
+            return (
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ background: sc.bg, color: sc.color, borderRadius: 4, padding: "1px 7px", fontSize: 10, fontWeight: 700 }}>{s}</span>
+                <span style={{ fontSize: 11, color: C.slate, fontWeight: 600 }}>{cnt}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Implementation Tasks */}
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+          <div style={{ background: deptColor.light, borderLeft: `4px solid ${deptColor.bg}`, borderRadius: "0 8px 8px 0", padding: "8px 14px" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: deptColor.bg, textTransform: "uppercase", letterSpacing: 1 }}>Implementation Roadmap Tasks</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: deptColor.text }}>{currentDept.name}</div>
+          </div>
+        </div>
+        <ImplTaskTable tasks={tasks} onUpdate={updateImplTask} isMobile={isMobile} isUnlocked={isUnlocked} />
+      </div>
+
+      {/* Weekly Plan Meeting */}
+      <div>
+        <div style={{ background: `linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 100%)`, borderRadius: "12px 12px 0 0", padding: "14px 20px", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ background: C.teal, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>📅</div>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 900, fontSize: 15 }}>Weekly Plan Meeting</div>
+            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>{currentDept.name} — add and track weekly tasks</div>
+          </div>
+        </div>
+        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", padding: "16px" }}>
+          {weeklyTasks[activeDept].length === 0 && !isMobile && (
+            <div style={{ textAlign: "center", padding: "20px 0", color: C.slate, fontSize: 13 }}>
+              No weekly tasks yet. Click <strong>+ Add Weekly Task</strong> to get started.
+            </div>
+          )}
+          <WeeklyPlanTable tasks={weeklyTasks[activeDept]} onUpdate={updateWeeklyTask} onAdd={addWeeklyTask} onRemove={removeWeeklyTask} isMobile={isMobile} isUnlocked={isUnlocked} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const navTabs = [
   {id:"strategy",label:"Strategy"},{id:"architecture",label:"Architecture"},
   {id:"territories",label:"Territories & Access"},{id:"teams",label:"Teams"},
   {id:"assets",label:"Assets"},{id:"flow",label:"Service Flow"},
   {id:"roadmap",label:"Implementation Roadmap"},{id:"limitations",label:"Limitations"},
+  {id:"tasks",label:"Task Management"},
 ] as const;
 
 type TabId = (typeof navTabs)[number]["id"];
@@ -1504,7 +2040,7 @@ export default function App() {
     };
   }, []);
 
-  const map: Record<TabId, ReactNode> = { strategy:<StrategySection isMobile={isMobile} />, architecture:<ArchitectureSection isMobile={isMobile} />, territories:<TerritoriesSection isMobile={isMobile} />, teams:<TeamsSection isMobile={isMobile} />, assets:<AssetsSection isMobile={isMobile} />, flow:<ServiceFlowSection isMobile={isMobile} />, roadmap:<RoadmapSection isMobile={isMobile} />, limitations:<LimitationsSection isMobile={isMobile} /> };
+  const map: Record<TabId, ReactNode> = { strategy:<StrategySection isMobile={isMobile} />, architecture:<ArchitectureSection isMobile={isMobile} />, territories:<TerritoriesSection isMobile={isMobile} />, teams:<TeamsSection isMobile={isMobile} />, assets:<AssetsSection isMobile={isMobile} />, flow:<ServiceFlowSection isMobile={isMobile} />, roadmap:<RoadmapSection isMobile={isMobile} />, limitations:<LimitationsSection isMobile={isMobile} />, tasks:<TaskManagementSection isMobile={isMobile} /> };
   return (
     <div style={{ fontFamily:"'Trebuchet MS','Gill Sans',sans-serif", background:"#eef2f7", minHeight:"100vh", overflowX:"hidden", WebkitTextSizeAdjust:"100%" as any }}>
       <div style={{ background:C.navy, position:"sticky", top:0, zIndex:100, boxShadow:"0 4px 24px rgba(0,0,0,0.3)" }}>
@@ -1527,6 +2063,3 @@ export default function App() {
     </div>
   );
 }
-
-
-
