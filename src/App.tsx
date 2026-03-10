@@ -152,14 +152,14 @@ const outOfScopeItems = [
     category: "Job Sheet Template Build",
     icon: "📝",
     owner: "Process Owner / Department Heads + HSE Lead",
-    description: "Design, content, and sign-off of all job sheet templates (PPM Checklist, Normal Service, Fire Fighting Inspection, Project Completion). IT will configure the approved templates in FSM only after full Process Owner approval.",
+    description: "Design, content, and sign-off of all job sheet templates (PPM Checklist, Normal Service, Fire Fighting Inspection, Project Completion).",
     templates: [
       "PPM Checklist",
       "Normal Service ",
       "Fire Fighting Inspection",
       "Project Completion",
     ],
-    note: "IT will not build templates without a fully approved and signed-off template document from the Process Owner.",
+    note: "",
   },
   {
     category: "PPM Schedule Configuration",
