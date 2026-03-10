@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 const C = {
   navy:"#0d1b2e", navyMid:"#1a2f4a", teal:"#0e9e8e", tealLight:"#d0f5f1",
@@ -1443,6 +1443,10 @@ interface WeeklyTask {
   status: TaskStatus; notes: string;
 }
 
+const LOCAL_IMPL_TASKS_KEY = "fsm_impl_tasks";
+const LOCAL_WEEKLY_TASKS_KEY = "fsm_weekly_tasks";
+const TASKS_API_ENDPOINT = "/api/task-management";
+
 const DEPT_COLORS: Record<string, { bg: string; light: string; text: string }> = {
   eom: { bg: C.eom.bg, light: C.eom.light, text: C.eom.text },
   fft: { bg: C.fft.bg, light: C.fft.light, text: C.fft.text },
@@ -1497,6 +1501,10 @@ function initAllTasks(): Record<DeptId, ImplTask[]> {
     cst: buildPoTasks(), pt: buildPoTasks(),  ig: buildPoTasks(),
     it: buildItTasks(),
   };
+}
+
+function initWeeklyTasks(): Record<DeptId, WeeklyTask[]> {
+  return { eom: [], fft: [], got: [], cst: [], pt: [], ig: [], it: [] };
 }
 
 // ─── DATE HELPERS ─────────────────────────────────────
@@ -1784,32 +1792,70 @@ function WeeklyPlanTable({ tasks, onUpdate, onAdd, onRemove, isMobile, isUnlocke
 
 function TaskManagementSection({ isMobile }: ResponsiveProps) {
   const [activeDept, setActiveDept] = useState<DeptId>("eom");
-  const [implTasks, setImplTasks] = useState<Record<DeptId, ImplTask[]>>(() => {
-    try {
-      const saved = localStorage.getItem("fsm_impl_tasks");
-      if (saved) return JSON.parse(saved) as Record<DeptId, ImplTask[]>;
-    } catch {}
-    return initAllTasks();
-  });
-  const [weeklyTasks, setWeeklyTasks] = useState<Record<DeptId, WeeklyTask[]>>(() => {
-    try {
-      const saved = localStorage.getItem("fsm_weekly_tasks");
-      if (saved) return JSON.parse(saved) as Record<DeptId, WeeklyTask[]>;
-    } catch {}
-    return { eom: [], fft: [], got: [], cst: [], pt: [], ig: [], it: [] };
-  });
+  const [implTasks, setImplTasks] = useState<Record<DeptId, ImplTask[]>>(() => initAllTasks());
+  const [weeklyTasks, setWeeklyTasks] = useState<Record<DeptId, WeeklyTask[]>>(() => initWeeklyTasks());
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
+  const hasLoadedInitialData = useRef(false);
 
   useEffect(() => {
-    try { localStorage.setItem("fsm_impl_tasks", JSON.stringify(implTasks)); } catch {}
-  }, [implTasks]);
+    let cancelled = false;
+    async function loadInitialData() {
+      try {
+        const response = await fetch(TASKS_API_ENDPOINT, { cache: "no-store" });
+        if (response.ok) {
+          const data = await response.json() as { implTasks?: Record<DeptId, ImplTask[]>; weeklyTasks?: Record<DeptId, WeeklyTask[]> };
+          if (!cancelled && data.implTasks && data.weeklyTasks) {
+            hasLoadedInitialData.current = true;
+            setImplTasks(data.implTasks);
+            setWeeklyTasks(data.weeklyTasks);
+            try {
+              localStorage.setItem(LOCAL_IMPL_TASKS_KEY, JSON.stringify(data.implTasks));
+              localStorage.setItem(LOCAL_WEEKLY_TASKS_KEY, JSON.stringify(data.weeklyTasks));
+            } catch {}
+            return;
+          }
+        }
+      } catch {}
+
+      let fallbackImpl = initAllTasks();
+      let fallbackWeekly = initWeeklyTasks();
+      try {
+        const savedImpl = localStorage.getItem(LOCAL_IMPL_TASKS_KEY);
+        const savedWeekly = localStorage.getItem(LOCAL_WEEKLY_TASKS_KEY);
+        if (savedImpl) fallbackImpl = JSON.parse(savedImpl) as Record<DeptId, ImplTask[]>;
+        if (savedWeekly) fallbackWeekly = JSON.parse(savedWeekly) as Record<DeptId, WeeklyTask[]>;
+      } catch {}
+
+      if (!cancelled) {
+        hasLoadedInitialData.current = true;
+        setImplTasks(fallbackImpl);
+        setWeeklyTasks(fallbackWeekly);
+      }
+    }
+    void loadInitialData();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
-    try { localStorage.setItem("fsm_weekly_tasks", JSON.stringify(weeklyTasks)); } catch {}
-  }, [weeklyTasks]);
+    if (!hasLoadedInitialData.current) return;
+    const payload = { implTasks, weeklyTasks };
+    try {
+      localStorage.setItem(LOCAL_IMPL_TASKS_KEY, JSON.stringify(implTasks));
+      localStorage.setItem(LOCAL_WEEKLY_TASKS_KEY, JSON.stringify(weeklyTasks));
+    } catch {}
+
+    const controller = new AbortController();
+    void fetch(TASKS_API_ENDPOINT, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    }).catch(() => {});
+    return () => controller.abort();
+  }, [implTasks, weeklyTasks]);
 
   function handleUnlock() {
     const correct = import.meta.env.VITE_TASK_EDIT_PASSWORD;
