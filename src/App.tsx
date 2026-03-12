@@ -273,6 +273,7 @@ const LIMITATIONS_DATA = [
       { name: "Number", limit: "10/module", included: false },
       { name: "Date", limit: "10/module", included: false },
       { name: "Job Sheets", limit: "10 Active | Total 20", included: false },
+      { name: "Job Sheet Sub Form", limit: "2/job sheet", included: false },
       { name: "Job Sheets Custom Fields", limit: "Max 200/job sheet", included: false },
       { name: "Text & Choice fields (Job Sheets)", limit: "72/job sheet", included: false },
       { name: "Decimal & Currency fields (Job Sheets)", limit: "28/job sheet", included: false },
@@ -1408,15 +1409,17 @@ function LimitationsSection({ isMobile }: ResponsiveProps) {
               </div>
             ) : (
               <div style={{ border:`1px solid ${C.border}`, borderRadius:10, overflow:"hidden" }}>
-                <div style={{ display:"grid", gridTemplateColumns:"1.7fr 1fr 0.7fr", background:"#f8fafc", borderBottom:`1px solid ${C.border}` }}>
+                <div style={{ display:"grid", gridTemplateColumns:section.section === "Work Order Management" ? "1.4fr 1fr 1fr 0.7fr" : "1.7fr 1fr 0.7fr", background:"#f8fafc", borderBottom:`1px solid ${C.border}` }}>
                   <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8 }}>Feature / Item</div>
                   <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"right", borderLeft:`1px solid ${C.border}` }}>Limit / Value</div>
+                  {section.section === "Work Order Management" && <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"right", borderLeft:`1px solid ${C.border}` }}>Uplifted Limit / Value</div>}
                   <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"center", borderLeft:`1px solid ${C.border}` }}>Availability</div>
                 </div>
                 {section.items.map((item, i) => (
-                  <div key={item.name} style={{ display:"grid", gridTemplateColumns:"1.7fr 1fr 0.7fr", background:i%2===0?C.white:"#fafbfc", borderBottom:i<section.items.length-1?`1px solid ${C.border}`:"none" }}>
+                  <div key={item.name} style={{ display:"grid", gridTemplateColumns:section.section === "Work Order Management" ? "1.4fr 1fr 1fr 0.7fr" : "1.7fr 1fr 0.7fr", background:i%2===0?C.white:"#fafbfc", borderBottom:i<section.items.length-1?`1px solid ${C.border}`:"none" }}>
                     <div style={{ padding:"10px 12px", fontSize:12, fontWeight:600, color:C.navy }}>{item.name}</div>
                     <div style={{ padding:"10px 12px", fontSize:12, color:"#334155", textAlign:"right", borderLeft:`1px solid ${C.border}` }}>{item.limit || "—"}</div>
+                    {section.section === "Work Order Management" && <div style={{ padding:"10px 12px", fontSize:12, color:"#334155", textAlign:"right", borderLeft:`1px solid ${C.border}` }}>—</div>}
                     <div style={{ padding:"10px 12px", textAlign:"center", borderLeft:`1px solid ${C.border}` }}>
                       {item.included ? <Pill label="Included" bg="#dcfce7" color="#15803d" /> : <Pill label="Limited" bg={C.slateLight} color={C.slate} />}
                     </div>
