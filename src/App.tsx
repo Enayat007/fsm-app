@@ -1744,8 +1744,8 @@ function WeeklyPlanTable({ tasks, onUpdate, onAdd, onRemove, isMobile, isUnlocke
               {isUnlocked && <button onClick={() => onRemove(t.id)} style={{ background: "#fee2e2", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#dc2626", fontSize: 12, fontWeight: 700 }}>✕</button>}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 6 }}>
-              {isUnlocked ? <input placeholder="Due date" value={t.dueDate} onChange={e => onUpdate(t.id,"dueDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.dueDate} placeholder="No date" />}
-              {isUnlocked ? <input placeholder="Completed date" value={t.completedDate} onChange={e => onUpdate(t.id,"completedDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.completedDate} placeholder="Not completed" />}
+              {isUnlocked ? <input type="date" value={toDateInputValue(t.dueDate)} onChange={e => onUpdate(t.id,"dueDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={formatTaskDate(t.dueDate)} placeholder="No date" />}
+              {isUnlocked ? <input type="date" value={toDateInputValue(t.completedDate)} onChange={e => onUpdate(t.id,"completedDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={formatTaskDate(t.completedDate)} placeholder="Not completed" />}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
               {isUnlocked ? <StatusSelect value={t.status} onChange={v => onUpdate(t.id,"status",v)} /> : <Pill label={t.status} bg={STATUS_COLORS[t.status].bg} color={STATUS_COLORS[t.status].color} />}
@@ -1775,8 +1775,8 @@ function WeeklyPlanTable({ tasks, onUpdate, onAdd, onRemove, isMobile, isUnlocke
           <div key={t.id} style={{ display: "grid", gridTemplateColumns: isUnlocked ? "2fr 0.9fr 1fr 1fr 1.6fr 0.4fr" : "2fr 0.9fr 1fr 1fr 1.6fr",
             background: idx % 2 === 0 ? C.white : "#fafbfc", borderBottom: idx < tasks.length - 1 ? `1px solid ${C.border}` : "none", alignItems: "center" }}>
             <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px" }}>{isUnlocked ? <input placeholder="Task description" value={t.task} onChange={e => onUpdate(t.id,"task",e.target.value)} style={inputStyle} /> : <span style={{ fontSize: 12, fontWeight: 600, color: C.navy }}>{t.task || "—"}</span>}</div>
-            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input placeholder="Date" value={t.dueDate} onChange={e => onUpdate(t.id,"dueDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.dueDate} />}</div>
-            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input placeholder="Date" value={t.completedDate} onChange={e => onUpdate(t.id,"completedDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.completedDate} />}</div>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input type="date" value={toDateInputValue(t.dueDate)} onChange={e => onUpdate(t.id,"dueDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={formatTaskDate(t.dueDate)} />}</div>
+            <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input type="date" value={toDateInputValue(t.completedDate)} onChange={e => onUpdate(t.id,"completedDate",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={formatTaskDate(t.completedDate)} />}</div>
             <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <StatusSelect value={t.status} onChange={v => onUpdate(t.id,"status",v)} /> : <Pill label={t.status} bg={STATUS_COLORS[t.status].bg} color={STATUS_COLORS[t.status].color} />}</div>
             <div style={{ padding: isUnlocked ? "6px 10px" : "10px 12px", borderLeft: `1px solid ${C.border}` }}>{isUnlocked ? <input placeholder="Notes" value={t.notes} onChange={e => onUpdate(t.id,"notes",e.target.value)} style={inputStyle} /> : <ReadOnlyField value={t.notes} />}</div>
             {isUnlocked && <div style={{ padding: "6px 8px", borderLeft: `1px solid ${C.border}`, textAlign: "center" }}>
@@ -1884,10 +1884,19 @@ function TaskManagementSection({ isMobile }: ResponsiveProps) {
   }
 
   function addWeeklyTask() {
+    const deptId = activeDept;
     const newTask: WeeklyTask = {
-      id: `wt-${activeDept}-${Date.now()}`, task: "", dueDate: "", completedDate: "", status: "Not Started", notes: "",
+      id: `wt-${deptId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      task: "",
+      dueDate: "",
+      completedDate: "",
+      status: "Not Started",
+      notes: "",
     };
-    setWeeklyTasks(prev => ({ ...prev, [activeDept]: [...prev[activeDept], newTask] }));
+    setWeeklyTasks(prev => {
+      const currentDeptTasks = prev[deptId] ?? [];
+      return { ...prev, [deptId]: [...currentDeptTasks, newTask] };
+    });
   }
 
   function updateWeeklyTask(id: string, field: keyof Omit<WeeklyTask,"id">, val: string) {
@@ -2041,8 +2050,10 @@ const navTabs = [
   {id:"strategy",label:"Strategy"},{id:"architecture",label:"Architecture"},
   {id:"territories",label:"Territories & Access"},{id:"teams",label:"Teams"},
   {id:"assets",label:"Assets"},{id:"flow",label:"Service Flow"},
-  {id:"roadmap",label:"Implementation Roadmap"},{id:"limitations",label:"Limitations"},
+  {id:"roadmap",label:"Implementation Roadmap"},
   {id:"tasks",label:"Task Management"},
+  {id:"limitations",label:"Limitations"},
+
 ] as const;
 
 type TabId = (typeof navTabs)[number]["id"];
