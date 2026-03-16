@@ -659,6 +659,61 @@ const territoryLocationData = [
           { name:"East – Sector 8",          code:"EST" },
           { name:"South – Sector 9",         code:"STH" },
         ] },
+        // ─── SHARJAH ─────────────────
+    {
+      name:"Sharjah",
+      ref:"https://www.visitsharjah.com/regions/",
+      locations:[
+        { name:"Sharjah City Region", code:"SHJ" },
+        { name:"Central Region",      code:"SHC" },
+        { name:"East Coast Region",   code:"SHE" },
+      ]
+    },
+
+    // ─── AJMAN ─────────────────
+    {
+      name:"Ajman",
+      ref:"https://www.ajman.ae/en/happiness-bundle/emirate-ajman/emirates-ajman",
+      locations:[
+        { name:"Ajman City", code:"AJM" },
+        { name:"Masfout",    code:"MSF" },
+        { name:"Al Manama",  code:"MNM" },
+      ]
+    },
+
+    // ─── RAS AL KHAIMAH ─────────────────
+    {
+      name:"Ras Al Khaimah",
+      ref:"https://www.rak.ae/wps/portal/rak/about/ras-al-khaimah/general-information",
+      locations:[
+        { name:"RAK City",            code:"RAK" },
+        { name:"Northern Area",       code:"RKN" },
+        { name:"Southern Area",       code:"RKS" },
+        { name:"Al Nakheel",          code:"NKH" },
+        { name:"Rural / Agricultural",code:"RAG" },
+      ]
+    },
+
+    // ─── FUJAIRAH ─────────────────
+    {
+      name:"Fujairah",
+      ref:"https://fujairah.ae/en",
+      locations:[
+        { name:"Fujairah City",  code:"FJR" },
+        { name:"Dibba",          code:"DIB" },
+        { name:"Other Key Areas",code:"FJA" },
+      ]
+    },
+
+    // ─── UMM AL QUWAIN ─────────────────
+    {
+      name:"Umm Al Quwain",
+      ref:"https://u.ae/en/about-the-uae/the-seven-emirates/umm-al-quwain",
+      locations:[
+        { name:"Umm Al Quwain City", code:"UAQ" },
+        { name:"Inland Areas",       code:"UAI" },
+      ]
+    }
     ] },
   { id:"omn", country:"Oman", countryCode:"OMN", flag:"🇴🇲",
     subGroups:[
@@ -706,6 +761,7 @@ const deptList = [
   { id:"PT",  name:"Project Team",               color:C.pt  },
   { id:"IG",  name:"Industrial Gas",             color:C.ig  },
 ];
+
 
 function TerritoriesSection({ isMobile }: ResponsiveProps) {
   const [activeDept, setActiveDept] = useState("EOM");
@@ -843,7 +899,7 @@ function TerritoriesSection({ isMobile }: ResponsiveProps) {
               {/* Card header */}
               <div style={{ background:`${dept.color.bg}08`, borderBottom:`1px solid ${dept.color.bg}20`, padding:"14px 18px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:22 }}>{country.flag}</span>
+                  <span style={{ fontSize:22, color:dept.color.bg }}>{country.flag}</span>
                   <div>
                     <div style={{ fontWeight:900, fontSize:15, color:C.navy }}>{country.country}</div>
                     <div style={{ fontSize:10, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, marginTop:1 }}>{country.countryCode} · {total} territories</div>
@@ -1378,7 +1434,13 @@ function LimitationsSection({ isMobile }: ResponsiveProps) {
   const sections = LIMITATIONS_DATA
     .map(section => ({
       ...section,
-      items: section.items.filter(item => !keyword || item.name.toLowerCase().includes(keyword) || (item.limit || "").toLowerCase().includes(keyword)),
+      items: section.items.filter(item => {
+        const upliftedLimit = "upliftedLimit" in item ? (item as { upliftedLimit?: string | null }).upliftedLimit : null;
+        return !keyword
+          || item.name.toLowerCase().includes(keyword)
+          || (item.limit || "").toLowerCase().includes(keyword)
+          || (upliftedLimit || "").toLowerCase().includes(keyword);
+      }),
     }))
     .filter(section => section.items.length > 0);
   return (
@@ -1404,22 +1466,25 @@ function LimitationsSection({ isMobile }: ResponsiveProps) {
                       <div style={{ fontSize:12, color:C.slate }}>{item.limit || "—"}</div>
                       {item.included ? <Pill label="Included" bg="#dcfce7" color="#15803d" /> : <Pill label="Limited" bg={C.slateLight} color={C.slate} />}
                     </div>
+                    <div style={{ marginTop:6, fontSize:11, color:"#334155" }}>
+                      <strong style={{ color:C.slate }}>Uplifted Limit / Value:</strong> {("upliftedLimit" in item ? (item as { upliftedLimit?: string | null }).upliftedLimit : null) || "—"}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div style={{ border:`1px solid ${C.border}`, borderRadius:10, overflow:"hidden" }}>
-                <div style={{ display:"grid", gridTemplateColumns:section.section === "Work Order Management" ? "1.4fr 1fr 1fr 0.7fr" : "1.7fr 1fr 0.7fr", background:"#f8fafc", borderBottom:`1px solid ${C.border}` }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1.4fr 1fr 1fr 0.7fr", background:"#f8fafc", borderBottom:`1px solid ${C.border}` }}>
                   <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8 }}>Feature / Item</div>
                   <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"right", borderLeft:`1px solid ${C.border}` }}>Limit / Value</div>
-                  {section.section === "Work Order Management" && <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"right", borderLeft:`1px solid ${C.border}` }}>Uplifted Limit / Value</div>}
+                  <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"right", borderLeft:`1px solid ${C.border}` }}>Uplifted Limit / Value</div>
                   <div style={{ padding:"9px 12px", fontSize:10, fontWeight:700, color:C.slate, textTransform:"uppercase", letterSpacing:0.8, textAlign:"center", borderLeft:`1px solid ${C.border}` }}>Availability</div>
                 </div>
                 {section.items.map((item, i) => (
-                  <div key={item.name} style={{ display:"grid", gridTemplateColumns:section.section === "Work Order Management" ? "1.4fr 1fr 1fr 0.7fr" : "1.7fr 1fr 0.7fr", background:i%2===0?C.white:"#fafbfc", borderBottom:i<section.items.length-1?`1px solid ${C.border}`:"none" }}>
+                  <div key={item.name} style={{ display:"grid", gridTemplateColumns:"1.4fr 1fr 1fr 0.7fr", background:i%2===0?C.white:"#fafbfc", borderBottom:i<section.items.length-1?`1px solid ${C.border}`:"none" }}>
                     <div style={{ padding:"10px 12px", fontSize:12, fontWeight:600, color:C.navy }}>{item.name}</div>
                     <div style={{ padding:"10px 12px", fontSize:12, color:"#334155", textAlign:"right", borderLeft:`1px solid ${C.border}` }}>{item.limit || "—"}</div>
-                    {section.section === "Work Order Management" && <div style={{ padding:"10px 12px", fontSize:12, color:"#334155", textAlign:"right", borderLeft:`1px solid ${C.border}` }}>—</div>}
+                    <div style={{ padding:"10px 12px", fontSize:12, color:"#334155", textAlign:"right", borderLeft:`1px solid ${C.border}` }}>{("upliftedLimit" in item ? (item as { upliftedLimit?: string | null }).upliftedLimit : null) || "—"}</div>
                     <div style={{ padding:"10px 12px", textAlign:"center", borderLeft:`1px solid ${C.border}` }}>
                       {item.included ? <Pill label="Included" bg="#dcfce7" color="#15803d" /> : <Pill label="Limited" bg={C.slateLight} color={C.slate} />}
                     </div>
